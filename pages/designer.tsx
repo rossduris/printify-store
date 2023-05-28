@@ -54,18 +54,30 @@ const dataLayers = [
 
 const Designer = () => {
   const { divRef, boundingRect } = useDivPosition();
-  const { mousePosition } = useMousePosition();
+  const { mousePosition, quadrant } = useMousePosition();
   const [layers, setLayers] = useState<Array<LayerProps>>();
-
-  useEffect(() => {
-    console.log(mousePosition);
-  }, [mousePosition]);
 
   useEffect(() => {
     setLayers(dataLayers);
   }, []);
 
-  const addNewLayer = () => {};
+  const addNewLayer = () => {
+    const layer = {
+      id: 4,
+      name: `layer5`,
+      x: 250,
+      y: 500,
+      width: 200,
+      height: 10,
+      bg: "purple",
+      isHovering: false,
+      isDraggin: false,
+    };
+
+    dataLayers.push(layer);
+
+    setLayers(dataLayers);
+  };
   return (
     <div className=" flex justify-center items-center min-h-screen">
       <div className=" designer bg-white text-black p-1 w-[900px]  rounded-lg relative overflow-hidden">
@@ -88,7 +100,7 @@ const Designer = () => {
           <div className=" layer-panel w-[200px] right-0 border-l h-[100% h-[800px]] relative">
             <h2 className="  text-gray-400 font-thin p-4 text-sm">Layers</h2>
             <PlusCircleIcon
-              onClick={addNewLayer}
+              onClick={() => addNewLayer()}
               className=" h-6 w-6 text-blue-300 absolute top-4 right-4 hover:text-blue-200 hover:cursor-pointer transition-all duration-1"
             />
             <div

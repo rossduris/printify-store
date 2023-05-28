@@ -65,3 +65,7 @@ body {
 .layer {
   position: absolute;
 }
+
+.product-images div:not(:nth-child(1)) {
+  display: none;
+}

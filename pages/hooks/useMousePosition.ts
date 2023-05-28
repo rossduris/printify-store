@@ -4,7 +4,6 @@ import useCanvasPosition from "./useCanvasPosition";
 type Position = {
   x: number;
   y: number;
-  quadrant: string;
 };
 
 type Dimension = {
@@ -16,6 +15,7 @@ export default function useMousePosition() {
   const [mousePosition, setMousePosition] = useState<Position>();
   const [boundingRect, setBoundingRect] = useState<Dimension>();
   const { canvasRect } = useCanvasPosition();
+  const [quadrant, setQuadrant] = useState("");
 
   useEffect(() => {
     const handleResize = () => {
@@ -30,44 +30,41 @@ export default function useMousePosition() {
 
     const handleMouseDown = (e: MouseEvent) => {
       console.log("clicked!");
+      console.log(e.pageX, e.pageY);
     };
 
     const handleMouseMovement = (e: MouseEvent) => {
       setMousePosition({
         x: e.pageX,
         y: e.pageY,
-        quadrant: "",
       });
 
-      if (canvasRect) {
-        const moveX = e.pageX - canvasRect.left;
-        const moveY = e.pageY - canvasRect.top;
+      if (!canvasRect) return;
+      const moveX = e.pageX - canvasRect.left;
+      const moveY = e.pageY - canvasRect.top;
 
-        console.log(moveX, moveY);
-
-        if (moveX > canvasRect.width / 2 && moveY < canvasRect.height / 2) {
-          setMousePosition({
-            ...mousePosition,
-            quadrant: `topRight`,
-          } as Position);
+      if (moveX > canvasRect.width / 2 && moveY < canvasRect.height / 2) {
+        if (quadrant != "topRight") {
+          console.log("set quadrant to topRight");
+          setQuadrant(`topRight`);
         }
-        if (moveX > canvasRect.width / 2 && moveY > canvasRect.height / 2) {
-          setMousePosition({
-            ...mousePosition,
-            quadrant: `bottomRight`,
-          } as Position);
+      }
+      if (moveX > canvasRect.width / 2 && moveY > canvasRect.height / 2) {
+        if (quadrant != "bottomRight") {
+          console.log("set quadrant to bottomRight");
+          setQuadrant(`bottomRight`);
         }
-        if (moveX < canvasRect.width / 2 && moveY > canvasRect.height / 2) {
-          setMousePosition({
-            ...mousePosition,
-            quadrant: `bottomLeft`,
-          } as Position);
+      }
+      if (moveX < canvasRect.width / 2 && moveY > canvasRect.height / 2) {
+        if (quadrant != "bottomLeft") {
+          console.log("set quadrant to bottomLeft");
+          setQuadrant(`bottomLeft`);
         }
-        if (moveX < canvasRect.width / 2 && moveY < canvasRect.height / 2) {
-          setMousePosition({
-            ...mousePosition,
-            quadrant: `topLeft`,
-          } as Position);
+      }
+      if (moveX < canvasRect.width / 2 && moveY < canvasRect.height / 2) {
+        if (quadrant != "topLeft") {
+          console.log("set quadrant to topLeft");
+          setQuadrant(`topLeft`);
         }
       }
     };
@@ -78,11 +75,10 @@ export default function useMousePosition() {
 
     return () => {
       window.removeEventListener("resize", handleResize);
-
       window.removeEventListener("mousemove", (e) => handleMouseMovement(e));
-      window.addEventListener("mousedown", (e) => handleMouseDown(e));
+      window.removeEventListener("mousedown", (e) => handleMouseDown(e));
     };
-  }, []);
+  }, [canvasRect]);
 
-  return { boundingRect, mousePosition };
+  return { boundingRect, mousePosition, quadrant };
 }
