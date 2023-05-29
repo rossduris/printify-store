@@ -33,20 +33,18 @@ const Shop = () => {
     <div>
       <h1>Shop</h1>
       <div className="shop-nav bg-slate-800 flex justify-end">
-        <ShoppingCart items={items} />
+        <ShoppingCart />
       </div>
-      <div className="bg-white m-10 p-4 rounded-lg grid grid-cols-4">
+      <div className="bg-white m-10 p-4 rounded-lg grid grid-cols-3 relative z-0">
         {products
           ? products.map((product) => {
               return (
-                <div>
-                  <Product
-                    key={product.id}
-                    variants={product.variants}
-                    images={product.images}
-                    product={product}
-                  />
-                </div>
+                <Product
+                  key={product.id}
+                  variants={product.variants}
+                  images={product.images}
+                  product={product}
+                />
               );
             })
           : "Loading..."}

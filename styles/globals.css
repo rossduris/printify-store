@@ -65,7 +65,14 @@ body {
 .layer {
   position: absolute;
 }
-
+.product-images div {
+  cursor: pointer;
+  transition: all 1s;
+}
+.product-images div:hover {
+  opacity: 0.8;
+  transition: all 1s;
+}
 .product-images div:not(:nth-child(1)) {
   display: none;
 }

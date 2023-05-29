@@ -10,12 +10,14 @@ type CartContextType = {
   items: Item[];
   addItem: (item: Item) => void;
   removeItem: (id: string) => void;
+  updateItem: (id: string, quantity: number) => void; // new function
 };
 
 const initValue = {
   items: [],
   addItem: () => {},
   removeItem: () => {},
+  updateItem: (id: string, quantity: number) => {}, // new function
 };
 
 const CartContext = createContext<CartContextType>(initValue);
@@ -28,6 +30,7 @@ export const CartProvider = ({
   initialItems: Item[];
 }) => {
   const [cartItems, setCartItems] = useState<Item[]>(initialItems);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Load items from local storage when component mounts
   useEffect(() => {
@@ -35,12 +38,17 @@ export const CartProvider = ({
     if (storedItems) {
       setCartItems(JSON.parse(storedItems) as Item[]);
     }
+    setIsMounted(true); // Set isMounted to true after the initial render
   }, []);
 
   // Save items to local storage whenever cartItems changes
   useEffect(() => {
+    // If the component is not mounted, do not save to localStorage
+    if (!isMounted) return;
+
+    // If the component is mounted, save to localStorage
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
-  }, [cartItems]);
+  }, [cartItems, isMounted]);
 
   const addItem = (item: Item) => {
     setCartItems((prevItems) => [...prevItems, item]);
@@ -50,8 +58,16 @@ export const CartProvider = ({
     setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
   };
 
+  const updateItem = (id: string, quantity: number) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
+    );
+  };
+
   return (
-    <CartContext.Provider value={{ items: cartItems, addItem, removeItem }}>
+    <CartContext.Provider
+      value={{ items: cartItems, addItem, removeItem, updateItem }}
+    >
       {children}
     </CartContext.Provider>
   );
