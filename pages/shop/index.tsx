@@ -30,12 +30,12 @@ const Shop = () => {
   }, []);
 
   return (
-    <div>
-      <h1>Shop</h1>
-      <div className="shop-nav bg-slate-800 flex justify-end">
+    <div className=" bg-slate-800">
+      <h1 className="text-4xl font-bold px-10 pt-10">Planet Cyborg</h1>
+      <div className="shop-nav flex justify-end">
         <ShoppingCart />
       </div>
-      <div className="bg-white m-10 p-4 rounded-lg grid grid-cols-3 relative z-0">
+      <div className="bg-[#f1f1f1] p-4 rounded-lg grid grid-cols-3 relative z-0 gap-10 m-10">
         {products
           ? products.map((product) => {
               return (

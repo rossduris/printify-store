@@ -1,3 +1,4 @@
+import { CartItem } from "@/types";
 import { createContext, useContext, useState, useEffect } from "react";
 
 export type Item = {
@@ -7,17 +8,17 @@ export type Item = {
 };
 
 type CartContextType = {
-  items: Item[];
+  items: CartItem[];
   addItem: (item: Item) => void;
   removeItem: (id: string) => void;
-  updateItem: (id: string, quantity: number) => void; // new function
+  updateItem: (id: string, quantity: number) => void;
 };
 
 const initValue = {
   items: [],
   addItem: () => {},
   removeItem: () => {},
-  updateItem: (id: string, quantity: number) => {}, // new function
+  updateItem: (id: string, quantity: number) => {},
 };
 
 const CartContext = createContext<CartContextType>(initValue);
@@ -29,39 +30,48 @@ export const CartProvider = ({
   children: React.ReactNode;
   initialItems: Item[];
 }) => {
-  const [cartItems, setCartItems] = useState<Item[]>(initialItems);
+  const [cartItems, setCartItems] = useState<CartItem[]>(
+    initialItems.map((item) => ({ ...item, quantity: 1 }))
+  );
   const [isMounted, setIsMounted] = useState(false);
 
-  // Load items from local storage when component mounts
   useEffect(() => {
     const storedItems = localStorage.getItem("cartItems");
     if (storedItems) {
-      setCartItems(JSON.parse(storedItems) as Item[]);
+      setCartItems(JSON.parse(storedItems) as CartItem[]);
     }
-    setIsMounted(true); // Set isMounted to true after the initial render
+    setIsMounted(true);
   }, []);
 
-  // Save items to local storage whenever cartItems changes
   useEffect(() => {
-    // If the component is not mounted, do not save to localStorage
     if (!isMounted) return;
 
-    // If the component is mounted, save to localStorage
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems, isMounted]);
 
   const addItem = (item: Item) => {
-    setCartItems((prevItems) => [...prevItems, item]);
-  };
-
-  const removeItem = (id: string) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
+    setCartItems((prevItems) => {
+      const existingItem = prevItems.find((i) => i.id === item.id);
+      if (existingItem) {
+        // Increment quantity of existing item.
+        return prevItems.map((i) =>
+          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      } else {
+        // Add new item with quantity 1.
+        return [...prevItems, { ...item, quantity: 1 }];
+      }
+    });
   };
 
   const updateItem = (id: string, quantity: number) => {
     setCartItems((prevItems) =>
       prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
     );
+  };
+
+  const removeItem = (id: string) => {
+    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
   };
 
   return (

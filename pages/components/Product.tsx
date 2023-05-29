@@ -11,11 +11,14 @@ const ProductImages = ({ images }: ProductImagesProps) => {
             .map((image, i) => (
               <div key={image.src} className=" relative min-h-[300px]">
                 <img
-                  className=" absolute -z-[10] top-[50%] left-[50%] -translate-x-[50%] -translate-y-[30%]"
+                  className=" absolute z-[10] top-[50%] left-[50%] -translate-x-[50%] -translate-y-[30%]"
                   src="/assets/loading.gif"
                   alt="loading..."
                 />
-                <img src={image.src} className="w-full h-full z-[10]" />
+                <img
+                  src={image.src}
+                  className="w-full h-full z-[100] relative"
+                />
               </div>
             ))
         : "Loading variant images"}
@@ -33,8 +36,9 @@ const SelectVariant = React.memo(
     const { addItem, items } = useCart();
 
     return (
-      <div>
+      <div className="flex items-center flex-col p-4">
         <select
+          className=" select select-ghost w-full"
           defaultValue={
             product.variants.find((v) => v.is_default)?.id ||
             product.variants[0]?.id
@@ -54,7 +58,7 @@ const SelectVariant = React.memo(
                 ))
             : "Loading variants..."}
         </select>
-        <div>
+        <div className="flex justify-between pt-4 w-full">
           <label
             className=" btn btn-primary"
             onClick={() =>
@@ -78,19 +82,22 @@ const SelectVariant = React.memo(
           <input type="checkbox" id="my-modal" className="modal-toggle" />
           <label htmlFor="my-modal" className="modal cursor-pointer">
             <label className="modal-box relative" htmlFor="">
-              <h3 className="text-lg font-bold">
-                Congratulations random Internet user!
-              </h3>
-              <p className="py-4">
-                You've been selected for a chance to get one year of
-                subscription to use Wikipedia for free!
-              </p>
+              <h3 className="text-lg font-bold">{product.title}</h3>
+              <ProductImages
+                selectedVariant={selectedVariant}
+                images={product.images}
+              />
               <div className="modal-action">
                 <label htmlFor="my-modal" className="btn">
-                  Yay!
+                  Close
                 </label>
               </div>
             </label>
+          </label>
+          <label className="text-green-800 text-xl font-bold flex justify-center items-end">
+            $
+            {Number(variants.find((v) => v.id === selectedVariant)?.price) /
+              100}
           </label>
         </div>
       </div>
@@ -113,11 +120,9 @@ const Product = React.memo(({ variants, images, product }: ProductProps) => {
   }, [images, selectedVariant]);
 
   return (
-    <div>
-      <h1>{product.title}</h1>
-      <h2>id: {product.id}</h2>
+    <div className=" bg-white shadow-xl rounded-2xl">
+      <h1 className="text-gray-300 text-2xl font-bold p-4">{product.title}</h1>
 
-      <h3>Selected Variant: {selectedVariant}</h3>
       <ProductImages selectedVariant={selectedVariant} images={variantImages} />
       <SelectVariant
         variants={variants}

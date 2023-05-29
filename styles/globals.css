@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  background-color: rgb(24, 21, 49);
+  background-color: rgb(30 41 59 / var(--tw-bg-opacity));
 }
 
 .designer-title {
