@@ -34,10 +34,7 @@ export type ProductVariant = {
 };
 
 export type ProductProps = {
-  variants: Array<ProductVariant>;
-  images: Array<ProductImage>;
   product: ShopProduct;
-  // children: React.ReactNode;
 };
 
 export type ProductImagesProps = {
@@ -60,18 +57,61 @@ export type SelectVariantProps = {
   selectedVariant: number | undefined;
 };
 
+export type PrintifyLineItem = {
+  product_id: string;
+  variant_id: number;
+  quantity: number;
+  print_provider_id?: number;
+  blueprint_id?: string;
+  sku?: string;
+};
+
+export type Address = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  country: string;
+  region: string;
+  address1: string;
+  address2: string;
+  city: string;
+  zip: string;
+};
+
+export type PrintifyOrder = {
+  line_items: PrintifyLineItem[];
+  address_to: Address;
+};
+
 export type Item = {
   id: string;
   name: string;
+  price: number;
+  variant_id: number;
+};
+
+export type CartContextType = {
+  items: CartItem[];
+  addItem: (item: Item) => void;
+  removeItem: (id: string) => void;
+  updateItem: (id: string, quantity: number) => void;
 };
 
 export type CartItem = {
-  id: string;
+  id: string; // This should map to the product_id for Printify
+  variant_id: number; // This will be needed for Printify
   name: string;
   quantity: number;
-  // price: number; // new field
+  price: number; // This is important for Stripe
 };
 
 export type ShoppingCartProps = {
   items: Item[];
+};
+
+export type ShippingDetail = {
+  cost: number;
+  method: string;
+  // Add any other fields here that you need for your application
 };

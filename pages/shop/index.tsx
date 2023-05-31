@@ -38,14 +38,7 @@ const Shop = () => {
       <div className="bg-[#f1f1f1] p-4 rounded-lg grid grid-cols-3 relative z-0 gap-10 m-10">
         {products
           ? products.map((product) => {
-              return (
-                <Product
-                  key={product.id}
-                  variants={product.variants}
-                  images={product.images}
-                  product={product}
-                />
-              );
+              return <Product key={product.id} product={product} />;
             })
           : "Loading..."}
       </div>

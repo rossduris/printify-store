@@ -63,14 +63,18 @@ const SelectVariant = React.memo(
             className=" btn btn-primary"
             onClick={() =>
               addItem({
-                id:
-                  product.id +
-                  variants.find((v) => v.id === selectedVariant)?.id,
+                id: product.id,
                 name:
                   product.title +
                   ", " +
                   variants.find((v) => v.id === selectedVariant)?.title,
-                price: 20,
+                price:
+                  Number(
+                    variants.find((v) => v.id === selectedVariant)?.price
+                  ) / 100,
+                variant_id: Number(
+                  variants.find((v) => v.id === selectedVariant)?.id
+                ),
               })
             }
           >
@@ -105,19 +109,21 @@ const SelectVariant = React.memo(
   }
 );
 
-const Product = React.memo(({ variants, images, product }: ProductProps) => {
+const Product = React.memo(({ product }: ProductProps) => {
   const [selectedVariant, setSelectedVariant] = useState<number | undefined>(
     () => {
-      const defaultVariant = variants.find((v) => v.is_default);
-      return defaultVariant ? defaultVariant.id : variants[0]?.id;
+      const defaultVariant = product.variants.find((v) => v.is_default);
+      return defaultVariant ? defaultVariant.id : product.variants[0]?.id;
     }
   );
 
   const variantImages = useMemo(() => {
     return selectedVariant
-      ? images.filter((image) => image.variant_ids.includes(selectedVariant))
+      ? product.images.filter((image) =>
+          image.variant_ids.includes(selectedVariant)
+        )
       : [];
-  }, [images, selectedVariant]);
+  }, [product.images, selectedVariant]);
 
   return (
     <div className=" bg-white shadow-xl rounded-2xl">
@@ -125,7 +131,7 @@ const Product = React.memo(({ variants, images, product }: ProductProps) => {
 
       <ProductImages selectedVariant={selectedVariant} images={variantImages} />
       <SelectVariant
-        variants={variants}
+        variants={product.variants}
         selectedVariant={selectedVariant}
         setSelectedVariant={setSelectedVariant}
         product={product}

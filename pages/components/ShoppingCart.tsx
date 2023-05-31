@@ -4,28 +4,20 @@ import { useCart } from "../context/CartContext";
 
 const ShoppingCart = () => {
   const { items, updateItem, removeItem } = useCart();
-  const [cartOpacity, setCartOpacity] = useState("opacity-100");
   const [cartVisible, setCartVisible] = useState(false);
-
-  // useEffect(() => {
-  //   flashCartOpacity();
-  // }, [items]);
-
-  const flashCartOpacity = () => {
-    setCartOpacity("opacity-50");
-    setTimeout(() => {
-      setCartOpacity("opacity-100");
-    }, 100);
-  };
 
   const toggleCart = () => {
     setCartVisible(!cartVisible);
   };
 
+  const getTotalPrice = () => {
+    return items
+      .reduce((total, item) => total + item.price * item.quantity, 0)
+      .toFixed(2);
+  };
+
   return (
-    <div
-      className={`z-50 text-center pt-2 fixed ${cartOpacity} transition-all duration-1`}
-    >
+    <div className={`z-50 text-center pt-2 fixed transition-all duration-1`}>
       <div className="absolute bg-white -top-20 right-0 w-80 min-h-12 shadow-xl">
         <h3 className="text-lg font-bold w-full">Cart</h3>
         <div
@@ -39,9 +31,12 @@ const ShoppingCart = () => {
             items.map((item: CartItem) => (
               <div
                 className="border border-gray-300 p-2 m-2 rounded-lg flex items-center gap-6"
-                key={item.id}
+                key={item.id + item.variant_id}
               >
-                <div>{item.name}</div>
+                <div>
+                  <div>{item.name}</div>
+                  <div>${item.price}</div>
+                </div>
                 <select
                   className="rounded-md px-1 h-6"
                   value={item.quantity}
@@ -66,6 +61,7 @@ const ShoppingCart = () => {
           ) : (
             <div>No items</div>
           )}
+          <div>Total Price: ${getTotalPrice()}</div>
         </div>
       </div>
     </div>

@@ -1,18 +1,5 @@
-import { CartItem } from "@/types";
+import { CartContextType, CartItem, Item } from "@/types";
 import { createContext, useContext, useState, useEffect } from "react";
-
-export type Item = {
-  id: string;
-  name: string;
-  price: number;
-};
-
-type CartContextType = {
-  items: CartItem[];
-  addItem: (item: Item) => void;
-  removeItem: (id: string) => void;
-  updateItem: (id: string, quantity: number) => void;
-};
 
 const initValue = {
   items: [],
@@ -51,15 +38,27 @@ export const CartProvider = ({
 
   const addItem = (item: Item) => {
     setCartItems((prevItems) => {
-      const existingItem = prevItems.find((i) => i.id === item.id);
+      const existingItem = prevItems.find(
+        (i) => i.id === item.id && i.variant_id === item.variant_id
+      );
       if (existingItem) {
         // Increment quantity of existing item.
         return prevItems.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === item.id && i.variant_id === item.variant_id
+            ? { ...i, quantity: i.quantity + 1 }
+            : i
         );
       } else {
-        // Add new item with quantity 1.
-        return [...prevItems, { ...item, quantity: 1 }];
+        // Add new item with quantity 1 and set its price and variant_id.
+        return [
+          ...prevItems,
+          {
+            ...item,
+            quantity: 1,
+            price: item.price,
+            variant_id: item.variant_id,
+          },
+        ];
       }
     });
   };
