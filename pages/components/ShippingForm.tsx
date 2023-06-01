@@ -1,7 +1,8 @@
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Address, CartItem } from "@/types";
+import { Address, CartItem, ShippingDetails } from "@/types";
 import { useCart } from "../context/CartContext";
+import { useEffect, useState } from "react";
 
 const validationSchema = Yup.object().shape({
   first_name: Yup.string().required("Required"),
@@ -17,12 +18,11 @@ const validationSchema = Yup.object().shape({
 });
 
 const ShippingForm = () => {
-  const { items } = useCart();
+  const [shippingData, setShippingData] = useState<ShippingDetails>();
+  const { items, updateItem } = useCart();
 
-  const getShippingInfo = async (
-    blueprint_id: number,
-    print_provider_id: number
-  ) => {
+  // modify your getShippingInfo function to return the shipping cost:
+  const getShippingInfo = async (item: CartItem, country: string) => {
     try {
       const response = await fetch("/api/printify/get-shipping", {
         method: "POST",
@@ -31,22 +31,43 @@ const ShippingForm = () => {
           "Content-Type": "application/json;charset=utf-8",
         },
         body: JSON.stringify({
-          blueprint_id: blueprint_id,
-          print_provider_id: print_provider_id,
+          blueprint_id: item.blueprint_id,
+          print_provider_id: item.print_provider_id,
         }),
-        // referrerPolicy: "no-referrer",
       });
       const data = await response.json();
-      console.log(data);
+      // assume data.profiles[0] is the correct profile and data.profiles[0].first_item.cost / 100 is the shipping cost for the first item:
+      return data.profiles[0].first_item.cost / 100;
     } catch (error) {
       console.error("Failed to fetch shipping information:", error);
     }
   };
 
-  const calculateShipping = () => {
+  useEffect(() => {
+    if (shippingData && shippingData.profiles) {
+      shippingData.profiles
+        .reverse()
+        .filter((profile) => profile.countries.includes("US"))
+        .map((profile) => {
+          //Here are the shipping cost per item then additional
+          console.log(
+            `First item: ${JSON.stringify(profile.first_item.cost / 100)}
+            Additional items: ${JSON.stringify(
+              profile.additional_items.cost / 100
+            )}`
+          );
+        });
+    }
+  }, [shippingData]);
+
+  // in your calculateShipping function, call updateItem after getting the shipping info:
+  const calculateShipping = (country: string) => {
     if (items) {
       items.map((item: CartItem) => {
-        getShippingInfo(item.blueprint_id, item.print_provider_id);
+        getShippingInfo(item, country).then((shippingCost) => {
+          // once you've got the shipping cost, update the item in the cart:
+          updateItem(item.id, item.variant_id, item.quantity, shippingCost);
+        });
       });
     } else {
       console.log("no items yet");
@@ -68,8 +89,9 @@ const ShippingForm = () => {
     } as Address,
     validationSchema,
     onSubmit: (values, { setSubmitting }) => {
+      console.log("TODO: get shipping data for :" + values.country);
       console.log(values);
-      calculateShipping();
+      calculateShipping(values.country);
       setSubmitting(false);
       // Here you can call the function to calculate the shipping and handle the next checkout steps
     },

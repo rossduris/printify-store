@@ -1,11 +1,16 @@
 import { CartContextType, CartItem, Item } from "@/types";
 import { createContext, useContext, useState, useEffect } from "react";
 
-const initValue = {
+const initValue: CartContextType = {
   items: [],
   addItem: () => {},
   removeItem: () => {},
-  updateItem: (id: string, quantity: number) => {},
+  updateItem: (
+    id: string,
+    variant_id: number,
+    quantity: number,
+    shippingCost?: number
+  ) => {},
 };
 
 const CartContext = createContext<CartContextType>(initValue);
@@ -17,6 +22,7 @@ export const CartProvider = ({
   children: React.ReactNode;
   initialItems: Item[];
 }) => {
+  const [items, setItems] = useState<CartItem[]>([]);
   const [cartItems, setCartItems] = useState<CartItem[]>(
     initialItems.map((item) => ({ ...item, quantity: 1 }))
   );
@@ -67,11 +73,16 @@ export const CartProvider = ({
     });
   };
 
-  const updateItem = (id: string, variant_id: number, quantity: number) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
+  const updateItem = (
+    id: string,
+    variant_id: number,
+    newQuantity: number,
+    shippingCost?: number
+  ) => {
+    setCartItems((prevItems: CartItem[]) =>
+      prevItems.map((item: CartItem) =>
         item.id === id && item.variant_id === variant_id
-          ? { ...item, quantity }
+          ? { ...item, quantity: newQuantity, shippingCost }
           : item
       )
     );

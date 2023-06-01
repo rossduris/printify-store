@@ -1,3 +1,5 @@
+import { object } from "yup";
+
 export type ShopProduct = {
   blueprint_id: number;
   print_provider_id: number;
@@ -99,7 +101,12 @@ export type CartContextType = {
   items: CartItem[];
   addItem: (item: Item) => void;
   removeItem: (id: string, variant_id: number) => void;
-  updateItem: (id: string, variant_id: number, quantity: number) => void;
+  updateItem: (
+    id: string,
+    variant_id: number,
+    quantity: number,
+    shippingCost?: number
+  ) => void;
 };
 
 export type CartItem = {
@@ -111,14 +118,26 @@ export type CartItem = {
   blueprint_id: number;
   print_provider_id: number;
   image: string;
+  shippingCost?: number; // This will store the shipping cost for each item
 };
 
 export type ShoppingCartProps = {
   items: Item[];
 };
 
-export type ShippingDetail = {
+export type ShippingDetails = {
+  handling_time: object;
+  profiles: Array<ShippingCost>;
+};
+
+export type ShippingCost = {
+  first_item: ShippingCostDetail;
+  additional_items: ShippingCostDetail;
+  countries: Array<string>;
+  variant_ids: Array<number>;
+};
+
+export type ShippingCostDetail = {
   cost: number;
-  method: string;
-  // Add any other fields here that you need for your application
+  currency: string;
 };

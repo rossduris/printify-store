@@ -7,7 +7,10 @@ const CartReview = () => {
 
   const getTotalPrice = () => {
     return items
-      .reduce((total, item) => total + item.price * item.quantity, 0)
+      .reduce((total, item) => {
+        const shippingCost = item.shippingCost ? item.shippingCost : 0;
+        return total + (item.price + shippingCost) * item.quantity;
+      }, 0)
       .toFixed(2);
   };
 
@@ -27,6 +30,7 @@ const CartReview = () => {
                   <img src={item.image} className=" w-24 h-24" />
                   <div>{item.name}</div>
                   <div>${item.price}</div>
+                  <div>${item.shippingCost}</div>
                   <div>{item.variant_id}</div>
                   <div>{item.blueprint_id}</div>
                   <div>{item.id}</div>
@@ -57,7 +61,14 @@ const CartReview = () => {
           ) : (
             <div>No items</div>
           )}
-          <div>Total Price: ${getTotalPrice()}</div>
+          {getTotalPrice() !== null ? (
+            <div>Total Price: ${getTotalPrice()}</div>
+          ) : (
+            <div>
+              Please enter your shipping information to calculate the total
+              cost.
+            </div>
+          )}
         </div>
       </div>
     </div>
