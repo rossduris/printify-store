@@ -37,6 +37,7 @@ export const CartProvider = ({
   }, [cartItems, isMounted]);
 
   const addItem = (item: Item) => {
+    console.log(item);
     setCartItems((prevItems) => {
       const existingItem = prevItems.find(
         (i) => i.id === item.id && i.variant_id === item.variant_id
@@ -57,6 +58,9 @@ export const CartProvider = ({
             quantity: 1,
             price: item.price,
             variant_id: item.variant_id,
+            blueprint_id: item.blueprint_id,
+            printprovider_id: item.print_provider_id,
+            image: item.image,
           },
         ];
       }

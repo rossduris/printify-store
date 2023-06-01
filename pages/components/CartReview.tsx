@@ -2,13 +2,8 @@ import { CartItem } from "@/types";
 import React, { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 
-const ShoppingCart = () => {
+const CartReview = () => {
   const { items, updateItem, removeItem } = useCart();
-  const [cartVisible, setCartVisible] = useState(false);
-
-  const toggleCart = () => {
-    setCartVisible(!cartVisible);
-  };
 
   const getTotalPrice = () => {
     return items
@@ -17,16 +12,11 @@ const ShoppingCart = () => {
   };
 
   return (
-    <div className={`z-50 text-center pt-2 fixed transition-all duration-1`}>
-      <div className=" bg-white right-0 w-[400px] min-h-12 shadow-xl">
-        <h3 className="text-lg font-bold w-full">Cart</h3>
-        <div
-          onClick={toggleCart}
-          className="transition-all duration-1 rotate-180 absolute top-2 right-5 cursor-pointer p-1 border border-gray-400 w-6 h-6 flex justify-center items-center select-none rounded-full"
-        >
-          {cartVisible ? "X" : "^"}
-        </div>
-        <div className={cartVisible ? "block" : "hidden"}>
+    <div>
+      <div className=" bg-white  min-h-12 shadow-xl rounded-xl p-4">
+        <h3 className="text-lg font-bold w-full">Order Summary</h3>
+
+        <div>
           {items.length ? (
             items.map((item: CartItem) => (
               <div
@@ -66,17 +56,10 @@ const ShoppingCart = () => {
             <div>No items</div>
           )}
           <div>Total Price: ${getTotalPrice()}</div>
-          {items.length > 0 ? (
-            <a className=" $ btn btn-primary" href="/checkout">
-              Checkout
-            </a>
-          ) : (
-            ""
-          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default ShoppingCart;
+export default CartReview;

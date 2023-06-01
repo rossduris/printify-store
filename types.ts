@@ -1,5 +1,6 @@
 export type ShopProduct = {
-  blueprint_id: string;
+  blueprint_id: number;
+  print_provider_id: number;
   created_at: string;
   description: string;
   id: string;
@@ -89,6 +90,9 @@ export type Item = {
   name: string;
   price: number;
   variant_id: number;
+  blueprint_id: number;
+  print_provider_id: number;
+  image: string;
 };
 
 export type CartContextType = {
@@ -104,6 +108,9 @@ export type CartItem = {
   name: string;
   quantity: number;
   price: number; // This is important for Stripe
+  blueprint_id: number;
+  print_provider_id: number;
+  image: string;
 };
 
 export type ShoppingCartProps = {

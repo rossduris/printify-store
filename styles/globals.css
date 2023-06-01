@@ -79,9 +79,13 @@ body {
 
 .checkout-form .form-control {
   width: 100%;
-  margin-left: 0 !important;
+  /* margin-left: 0 !important; */
 }
 
 .checkout-form .half {
   width: 40%;
+}
+
+.space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  margin-left: 0 !important;
 }

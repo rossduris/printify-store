@@ -75,6 +75,13 @@ const SelectVariant = React.memo(
                 variant_id: Number(
                   variants.find((v) => v.id === selectedVariant)?.id
                 ),
+                blueprint_id: Number(product.blueprint_id),
+                print_provider_id: Number(product.print_provider_id),
+                image: String(
+                  product.images.filter((image) =>
+                    image.variant_ids.includes(Number(selectedVariant))
+                  )[0].src
+                ),
               })
             }
           >
