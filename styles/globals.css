@@ -89,3 +89,6 @@ body {
 .space-x-4 > :not([hidden]) ~ :not([hidden]) {
   margin-left: 0 !important;
 }
+.checkout-form .form-control span:not(.text-error) {
+  color: rgb(107, 107, 107);
+}

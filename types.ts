@@ -98,8 +98,8 @@ export type Item = {
 export type CartContextType = {
   items: CartItem[];
   addItem: (item: Item) => void;
-  removeItem: (id: string) => void;
-  updateItem: (id: string, quantity: number) => void;
+  removeItem: (id: string, variant_id: number) => void;
+  updateItem: (id: string, variant_id: number, quantity: number) => void;
 };
 
 export type CartItem = {

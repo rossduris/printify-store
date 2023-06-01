@@ -42,14 +42,14 @@ const ShoppingCart = () => {
                   <div>{item.id}</div>
                 </div>
                 <select
-                  className="rounded-md px-1 h-6"
+                  className="rounded-md px-1 h-6 bg-slate-100 border border-slate-200 text-slate-500"
                   value={item.quantity}
                   onChange={(e) => {
                     const newQuantity = Number(e.target.value);
                     if (newQuantity > 0) {
-                      updateItem(item.id, newQuantity);
+                      updateItem(item.id, item.variant_id, newQuantity);
                     } else {
-                      removeItem(item.id);
+                      removeItem(item.id, item.variant_id);
                     }
                   }}
                 >
@@ -59,7 +59,9 @@ const ShoppingCart = () => {
                     </option>
                   ))}
                 </select>
-                <button onClick={() => removeItem(item.id)}>X</button>
+                <button onClick={() => removeItem(item.id, item.variant_id)}>
+                  X
+                </button>
               </div>
             ))
           ) : (

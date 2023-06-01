@@ -67,14 +67,22 @@ export const CartProvider = ({
     });
   };
 
-  const updateItem = (id: string, quantity: number) => {
+  const updateItem = (id: string, variant_id: number, quantity: number) => {
     setCartItems((prevItems) =>
-      prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
+      prevItems.map((item) =>
+        item.id === id && item.variant_id === variant_id
+          ? { ...item, quantity }
+          : item
+      )
     );
   };
 
-  const removeItem = (id: string) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  const removeItem = (id: string, variant_id: number) => {
+    setCartItems((prevItems) =>
+      prevItems.filter(
+        (item) => !(item.id === id && item.variant_id === variant_id)
+      )
+    );
   };
 
   return (

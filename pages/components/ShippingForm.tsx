@@ -88,7 +88,7 @@ const ShippingForm = () => {
         </label>
         <input
           {...formik.getFieldProps("email")}
-          className="input input-bordered"
+          className="input input-bordered bg-slate-100 text-slate-500"
         />
         {formik.touched.email && formik.errors.email ? (
           <span className="label-text text-error">{formik.errors.email}</span>
@@ -103,7 +103,7 @@ const ShippingForm = () => {
           </label>
           <input
             {...formik.getFieldProps("first_name")}
-            className="input input-bordered"
+            className="input input-bordered bg-slate-100 text-slate-500"
           />
           {formik.touched.first_name && formik.errors.first_name ? (
             <span className="label-text text-error">
@@ -117,7 +117,7 @@ const ShippingForm = () => {
           </label>
           <input
             {...formik.getFieldProps("last_name")}
-            className="input input-bordered"
+            className="input input-bordered bg-slate-100 text-slate-500"
           />
           {formik.touched.last_name && formik.errors.last_name ? (
             <span className="label-text text-error">
@@ -132,7 +132,7 @@ const ShippingForm = () => {
         </label>
         <input
           {...formik.getFieldProps("address1")}
-          className="input input-bordered"
+          className="input input-bordered bg-slate-100 text-slate-500"
         />
         {formik.touched.address1 && formik.errors.address1 ? (
           <span className="label-text text-error">
@@ -146,7 +146,7 @@ const ShippingForm = () => {
         </label>
         <input
           {...formik.getFieldProps("address2")}
-          className="input input-bordered"
+          className="input input-bordered bg-slate-100 text-slate-500"
         />
         {formik.touched.address2 && formik.errors.address2 ? (
           <span className="label-text text-error">
@@ -161,7 +161,7 @@ const ShippingForm = () => {
           </label>
           <input
             {...formik.getFieldProps("city")}
-            className="input input-bordered"
+            className="input input-bordered bg-slate-100 text-slate-500"
           />
           {formik.touched.city && formik.errors.city ? (
             <span className="label-text text-error">{formik.errors.city}</span>
@@ -173,7 +173,10 @@ const ShippingForm = () => {
             <span className="label-text">Country</span>
           </label>
 
-          <select className="select" {...formik.getFieldProps("country")}>
+          <select
+            className="select bg-slate-100 text-slate-500"
+            {...formik.getFieldProps("country")}
+          >
             <option value="" disabled>
               Select...
             </option>
@@ -183,7 +186,7 @@ const ShippingForm = () => {
             <option value="AU">Australia</option>
           </select>
           {formik.touched.country && formik.errors.country ? (
-            <span className="label-text text-error">
+            <span className="label-text bg-slate-100 text-slate-500">
               {formik.errors.country}
             </span>
           ) : null}
@@ -196,7 +199,7 @@ const ShippingForm = () => {
           </label>
           <input
             {...formik.getFieldProps("region")}
-            className="input input-bordered"
+            className="input input-bordered bg-slate-100 text-slate-500"
           />
           {formik.touched.region && formik.errors.region ? (
             <span className="label-text text-error">
@@ -210,7 +213,7 @@ const ShippingForm = () => {
           </label>
           <input
             {...formik.getFieldProps("zip")}
-            className="input input-bordered"
+            className="input input-bordered bg-slate-100 text-slate-500"
           />
           {formik.touched.zip && formik.errors.zip ? (
             <span className="label-text text-error">{formik.errors.zip}</span>
@@ -223,7 +226,7 @@ const ShippingForm = () => {
         </label>
         <input
           {...formik.getFieldProps("phone")}
-          className="input input-bordered"
+          className="input input-bordered bg-slate-100 text-slate-500"
         />
         {formik.touched.phone && formik.errors.phone ? (
           <span className="label-text text-error">{formik.errors.phone}</span>
