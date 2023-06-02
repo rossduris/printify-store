@@ -17,7 +17,9 @@ const ShoppingCart = () => {
   };
 
   return (
-    <div className={`z-50 text-center pt-2 fixed transition-all duration-1`}>
+    <div
+      className={`z-50 text-center pt-2 fixed right-0 transition-all duration-1`}
+    >
       <div className=" bg-white right-0 w-[400px] min-h-12 shadow-xl">
         <h3 className="text-lg font-bold w-full">Cart</h3>
         <div

@@ -1,6 +1,9 @@
 import { CartItem } from "@/types";
 import React, { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
+import axios from "axios";
+import { loadStripe } from "@stripe/stripe-js";
+import getStripe from "../utils/stripe";
 
 const CartReview = () => {
   const { items, updateItem, removeItem } = useCart();
@@ -12,6 +15,43 @@ const CartReview = () => {
         return total + (item.price + shippingCost) * item.quantity;
       }, 0)
       .toFixed(2);
+  };
+
+  // modify your getShippingInfo function to return the shipping cost:
+  const getShippingInfo = async (item: CartItem, country: string) => {
+    try {
+      const response = await fetch("/api/printify/get-shipping", {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json;charset=utf-8",
+        },
+        body: JSON.stringify({
+          blueprint_id: item.blueprint_id,
+          print_provider_id: item.print_provider_id,
+        }),
+      });
+      const data = await response.json();
+      // assume data.profiles[0] is the correct profile and data.profiles[0].first_item.cost / 100 is the shipping cost for the first item:
+
+      return data.profiles[0].first_item.cost / 100;
+    } catch (error) {
+      console.error("Failed to fetch shipping information:", error);
+    }
+  };
+
+  // in your calculateShipping function, call updateItem after getting the shipping info:
+  const calculateShipping = (country: string) => {
+    if (items) {
+      items.map((item: CartItem) => {
+        getShippingInfo(item, country).then((shippingCost) => {
+          // once you've got the shipping cost, update the item in the cart:
+          updateItem(item.id, item.variant_id, item.quantity, shippingCost);
+        });
+      });
+    } else {
+      console.log("no items yet");
+    }
   };
 
   return (
@@ -30,10 +70,10 @@ const CartReview = () => {
                   <img src={item.image} className=" w-24 h-24" />
                   <div>{item.name}</div>
                   <div>${item.price}</div>
-                  <div>${item.shippingCost}</div>
-                  <div>{item.variant_id}</div>
-                  <div>{item.blueprint_id}</div>
-                  <div>{item.id}</div>
+                  <div>shipping: ${item.shippingCost}</div>
+                  <div>variant: {item.variant_id}</div>
+                  <div>blueprint: {item.blueprint_id}</div>
+                  <div>id:{item.id}</div>
                 </div>
                 <select
                   className="rounded-md px-1 h-6 bg-slate-100 border border-slate-200 text-slate-500"
@@ -62,7 +102,9 @@ const CartReview = () => {
             <div>No items</div>
           )}
           {getTotalPrice() !== null ? (
-            <div>Total Price: ${getTotalPrice()}</div>
+            <>
+              <div>Total Price: ${getTotalPrice()}</div>
+            </>
           ) : (
             <div>
               Please enter your shipping information to calculate the total

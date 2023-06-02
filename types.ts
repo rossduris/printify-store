@@ -127,10 +127,10 @@ export type ShoppingCartProps = {
 
 export type ShippingDetails = {
   handling_time: object;
-  profiles: Array<ShippingCost>;
+  profiles: Array<ShippingProfile>;
 };
 
-export type ShippingCost = {
+export type ShippingProfile = {
   first_item: ShippingCostDetail;
   additional_items: ShippingCostDetail;
   countries: Array<string>;

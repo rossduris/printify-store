@@ -92,3 +92,12 @@ body {
 .checkout-form .form-control span:not(.text-error) {
   color: rgb(107, 107, 107);
 }
+
+.drawer-toggle:checked ~ .drawer-side > .drawer-overlay,
+.drawer-toggle:checked ~ .drawer-side {
+  z-index: 50;
+}
+.drawer-toggle:not(:checked) ~ .drawer-side > .drawer-overlay,
+.drawer-toggle:not(:checked) ~ .drawer-side {
+  z-index: -50;
+}

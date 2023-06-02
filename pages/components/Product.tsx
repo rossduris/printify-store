@@ -4,21 +4,18 @@ import { ProductImagesProps, ProductProps, SelectVariantProps } from "@/types";
 
 const ProductImages = ({ images }: ProductImagesProps) => {
   return (
-    <div className="product-images min-h-[400px] z-100">
+    <div className="product-images min-h-[400px]">
       {images
         ? images
             .filter((img, i) => i === 0)
             .map((image, i) => (
               <div key={image.src} className=" relative min-h-[300px]">
                 <img
-                  className=" absolute z-[10] top-[50%] left-[50%] -translate-x-[50%] -translate-y-[30%]"
+                  className=" absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[30%]"
                   src="/assets/loading.gif"
                   alt="loading..."
                 />
-                <img
-                  src={image.src}
-                  className="w-full h-full z-[100] relative"
-                />
+                <img src={image.src} className="w-full h-full z-10 relative" />
               </div>
             ))
         : "Loading variant images"}
@@ -36,7 +33,7 @@ const SelectVariant = React.memo(
     const { addItem, items } = useCart();
 
     return (
-      <div className="flex items-center flex-col p-4">
+      <div className="flex items-center flex-col p-4 relative">
         <select
           className=" select select-ghost w-full"
           defaultValue={
@@ -133,7 +130,7 @@ const Product = React.memo(({ product }: ProductProps) => {
   }, [product.images, selectedVariant]);
 
   return (
-    <div className=" bg-white shadow-xl rounded-2xl">
+    <div className=" bg-white shadow-xl rounded-2xl z-30">
       <h1 className="text-gray-300 text-2xl font-bold p-4">{product.title}</h1>
 
       <ProductImages selectedVariant={selectedVariant} images={variantImages} />

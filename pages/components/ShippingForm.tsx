@@ -1,6 +1,6 @@
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Address, CartItem, ShippingDetails } from "@/types";
+import { Address, CartItem, ShippingDetails, ShippingProfile } from "@/types";
 import { useCart } from "../context/CartContext";
 import { useEffect, useState } from "react";
 
@@ -21,7 +21,6 @@ const ShippingForm = () => {
   const [shippingData, setShippingData] = useState<ShippingDetails>();
   const { items, updateItem } = useCart();
 
-  // modify your getShippingInfo function to return the shipping cost:
   const getShippingInfo = async (item: CartItem, country: string) => {
     try {
       const response = await fetch("/api/printify/get-shipping", {
@@ -36,8 +35,48 @@ const ShippingForm = () => {
         }),
       });
       const data = await response.json();
-      // assume data.profiles[0] is the correct profile and data.profiles[0].first_item.cost / 100 is the shipping cost for the first item:
-      return data.profiles[0].first_item.cost / 100;
+      setShippingData(data);
+
+      const restOfTheWorldProfile = data.profiles.find(
+        (profile: ShippingProfile) =>
+          profile.countries.includes("REST_OF_THE_WORLD")
+      );
+
+      // Filter profiles to those applicable for this item's variant_id and the selected country
+      const applicableProfiles = data.profiles.filter(
+        (profile: ShippingProfile) => {
+          return (
+            profile.variant_ids.includes(item.variant_id) &&
+            profile.countries.includes(country)
+          );
+        }
+      );
+
+      // If no applicable profile found for the selected country, use the "REST_OF_THE_WORLD" profile
+      let profile;
+      if (applicableProfiles.length) {
+        profile = applicableProfiles[0];
+      } else if (restOfTheWorldProfile) {
+        profile = restOfTheWorldProfile;
+      } else {
+        console.error(
+          "No applicable shipping profile found for item",
+          item.id,
+          "and country",
+          country
+        );
+        return; // Or handle this situation appropriately
+      }
+
+      const shippingCost = profile.first_item.cost / 100; // assuming cost is in cents
+      const additionalItemCost = profile.additional_items.cost / 100;
+
+      // Calculate total shipping cost based on quantity
+      // The cost for the first item plus the additional cost for any additional items
+      const totalShippingCost =
+        shippingCost + additionalItemCost * (item.quantity - 1);
+
+      return totalShippingCost;
     } catch (error) {
       console.error("Failed to fetch shipping information:", error);
     }
@@ -45,18 +84,15 @@ const ShippingForm = () => {
 
   useEffect(() => {
     if (shippingData && shippingData.profiles) {
-      shippingData.profiles
-        .reverse()
-        .filter((profile) => profile.countries.includes("US"))
-        .map((profile) => {
-          //Here are the shipping cost per item then additional
-          console.log(
-            `First item: ${JSON.stringify(profile.first_item.cost / 100)}
-            Additional items: ${JSON.stringify(
-              profile.additional_items.cost / 100
-            )}`
-          );
-        });
+      console.log(shippingData.profiles);
+      // shippingData.profiles.map((profile) => {
+      //   console.log(
+      //     `First item: ${JSON.stringify(profile.first_item.cost / 100)}
+      //       Additional items: ${JSON.stringify(
+      //         profile.additional_items.cost / 100
+      //       )}`
+      //   );
+      // });
     }
   }, [shippingData]);
 
@@ -89,8 +125,6 @@ const ShippingForm = () => {
     } as Address,
     validationSchema,
     onSubmit: (values, { setSubmitting }) => {
-      console.log("TODO: get shipping data for :" + values.country);
-      console.log(values);
       calculateShipping(values.country);
       setSubmitting(false);
       // Here you can call the function to calculate the shipping and handle the next checkout steps
@@ -198,6 +232,10 @@ const ShippingForm = () => {
           <select
             className="select bg-slate-100 text-slate-500"
             {...formik.getFieldProps("country")}
+            onChange={(e) => {
+              formik.handleChange(e);
+              calculateShipping(e.target.value);
+            }}
           >
             <option value="" disabled>
               Select...
