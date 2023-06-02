@@ -101,3 +101,21 @@ body {
 .drawer-toggle:not(:checked) ~ .drawer-side {
   z-index: -50;
 }
+
+.cartHide {
+  right: 0;
+  transition: all 0.25s ease-in-out;
+}
+
+.cartShow {
+  right: -400px;
+  transition: all 0.25s ease-in-out;
+}
+
+.overlayShow {
+  display: "none";
+}
+
+.overlayHide {
+  display: "block";
+}
