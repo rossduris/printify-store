@@ -113,9 +113,21 @@ body {
 }
 
 .overlayShow {
-  display: "none";
+  display: none;
+  transition: all 1s;
 }
 
 .overlayHide {
-  display: "block";
+  display: block;
+  transition: all 1s;
+}
+
+.form-control input {
+  --tw-bg-opacity: 1;
+  background-color: rgb(241 245 249);
+  color: rgb(33, 33, 33);
+}
+
+select {
+  color: rgb(75, 75, 75);
 }

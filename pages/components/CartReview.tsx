@@ -5,58 +5,23 @@ import axios from "axios";
 import { loadStripe } from "@stripe/stripe-js";
 import getStripe from "../utils/stripe";
 
-const CartReview = () => {
-  const { items, updateItem, removeItem } = useCart();
+type CartReviewProps = {
+  children: React.ReactNode;
+};
 
-  const getTotalPrice = () => {
-    return items
-      .reduce((total, item) => {
-        const shippingCost = item.shippingCost ? item.shippingCost : 0;
-        return total + (item.price + shippingCost) * item.quantity;
-      }, 0)
-      .toFixed(2);
-  };
-
-  // modify your getShippingInfo function to return the shipping cost:
-  const getShippingInfo = async (item: CartItem, country: string) => {
-    try {
-      const response = await fetch("/api/printify/get-shipping", {
-        method: "POST",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json;charset=utf-8",
-        },
-        body: JSON.stringify({
-          blueprint_id: item.blueprint_id,
-          print_provider_id: item.print_provider_id,
-        }),
-      });
-      const data = await response.json();
-      // assume data.profiles[0] is the correct profile and data.profiles[0].first_item.cost / 100 is the shipping cost for the first item:
-
-      return data.profiles[0].first_item.cost / 100;
-    } catch (error) {
-      console.error("Failed to fetch shipping information:", error);
-    }
-  };
-
-  // in your calculateShipping function, call updateItem after getting the shipping info:
-  const calculateShipping = (country: string) => {
-    if (items) {
-      items.map((item: CartItem) => {
-        getShippingInfo(item, country).then((shippingCost) => {
-          // once you've got the shipping cost, update the item in the cart:
-          updateItem(item.id, item.variant_id, item.quantity, shippingCost);
-        });
-      });
-    } else {
-      console.log("no items yet");
-    }
-  };
+const CartReview = ({ children }: CartReviewProps) => {
+  const {
+    items,
+    updateItem,
+    removeItem,
+    getShippingInfo,
+    calculateShipping,
+    getTotalPrice,
+  } = useCart();
 
   return (
     <div>
-      <div className=" bg-white  min-h-12 shadow-xl rounded-xl p-4">
+      <div className=" bg-white  shadow-xl rounded-xl p-4 mx-8">
         <h3 className="text-lg font-bold w-full">Order Summary</h3>
 
         <div>
@@ -76,12 +41,13 @@ const CartReview = () => {
                   <div>id:{item.id}</div>
                 </div>
                 <select
-                  className="rounded-md px-1 h-6 bg-slate-100 border border-slate-200 text-slate-500"
+                  className="rounded-md px-1 h-8 bg-slate-100 border border-slate-200 text-slate-500"
                   value={item.quantity}
                   onChange={(e) => {
                     const newQuantity = Number(e.target.value);
                     if (newQuantity > 0) {
                       updateItem(item.id, item.variant_id, newQuantity);
+                      calculateShipping(e.target.value);
                     } else {
                       removeItem(item.id, item.variant_id);
                     }
@@ -103,7 +69,12 @@ const CartReview = () => {
           )}
           {getTotalPrice() !== null ? (
             <>
-              <div>Total Price: ${getTotalPrice()}</div>
+              <div className=" p-4 text-xl rounded-lg mt-6 text-gray-600 flex justify-center">
+                Total Price: ${Number(getTotalPrice())}
+              </div>
+              <div className="w-full flex justify-center mt-8 h-20">
+                {children}
+              </div>
             </>
           ) : (
             <div>

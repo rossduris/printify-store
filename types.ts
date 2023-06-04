@@ -1,3 +1,4 @@
+import { ChangeEvent } from "react";
 import { object } from "yup";
 
 export type ShopProduct = {
@@ -107,17 +108,15 @@ export type CartContextType = {
     quantity: number,
     shippingCost?: number
   ) => void;
+  getShippingInfo: (item: CartItem, country: string) => void;
+  calculateShipping: (country: string) => void;
+  getTotalPrice: () => void;
+  selectedCountry: string;
+  handleCountryChange: (e: ChangeEvent<HTMLSelectElement>) => void;
 };
 
-export type CartItem = {
-  id: string; // This should map to the product_id for Printify
-  variant_id: number; // This will be needed for Printify
-  name: string;
+export type CartItem = Item & {
   quantity: number;
-  price: number; // This is important for Stripe
-  blueprint_id: number;
-  print_provider_id: number;
-  image: string;
   shippingCost?: number; // This will store the shipping cost for each item
 };
 

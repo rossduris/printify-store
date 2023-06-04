@@ -10,10 +10,8 @@ const CheckoutPage = () => {
   return (
     <>
       <h1 className="text-4xl font-bold p-10 ">Planet Cyborg</h1>
-      <div className=" grid  bg-white p-10 md:grid-cols-2 sm:grid-cols-1">
-        <ShippingForm />
-        <CartReview />
-      </div>
+
+      <ShippingForm />
     </>
   );
 };
