@@ -117,7 +117,7 @@ export type CartContextType = {
 
 export type CartItem = Item & {
   quantity: number;
-  shippingCost?: number; // This will store the shipping cost for each item
+  shippingCosts: ShippingCosts;
 };
 
 export type ShoppingCartProps = {
@@ -139,4 +139,10 @@ export type ShippingProfile = {
 export type ShippingCostDetail = {
   cost: number;
   currency: string;
+};
+
+export type ShippingCosts = {
+  US: { firstItemCost: number; additionalItemCost: number };
+  CA: { firstItemCost: number; additionalItemCost: number };
+  Rest_of_the_world: { firstItemCost: number; additionalItemCost: number };
 };

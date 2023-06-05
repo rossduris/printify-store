@@ -75,33 +75,53 @@ export const CartProvider = ({
   };
 
   const addItem = async (item: Item) => {
-    console.log(item);
     const cartItem = { ...item, quantity: 1 }; // Set default quantity to 1
-    const shippingCost = await getShippingInfo(cartItem, selectedCountry); // Use selectedCountry instead of "US"
+    const shippingCostData = await getShippingInfo(cartItem, selectedCountry); // Use selectedCountry instead of "US"
+
+    if (!shippingCostData) {
+      // Handle error, shipping cost data could not be fetched.
+      console.error("Failed to fetch shipping cost data");
+      return;
+    }
+    const { firstItemCost, additionalItemCost } = shippingCostData;
 
     setCartItems((prevItems) => {
+      // Check if this exact item already exists in the cart
       const existingItem = prevItems.find(
         (i) => i.id === item.id && i.variant_id === item.variant_id
       );
-      if (existingItem && shippingCost) {
+
+      // Check if there are other items from the same provider
+      const otherItemsFromProvider = prevItems.filter(
+        (i) =>
+          i.print_provider_id === item.print_provider_id &&
+          (i.id !== item.id || i.variant_id !== item.variant_id)
+      );
+
+      if (existingItem) {
         // Increment quantity of existing item and recalculate shipping.
+        const updatedShippingCost =
+          firstItemCost + additionalItemCost * existingItem.quantity;
         return prevItems.map((i) =>
           i.id === item.id && i.variant_id === item.variant_id
             ? {
                 ...i,
                 quantity: i.quantity + 1,
-                shippingCost: shippingCost * (i.quantity + 1),
+                shippingCost: updatedShippingCost,
               }
             : i
         );
       } else {
         // Add new item with quantity 1 and set its price and variant_id.
+        const newShippingCost = otherItemsFromProvider.length
+          ? additionalItemCost
+          : firstItemCost;
         return [
           ...prevItems,
           {
             ...item,
             quantity: 1,
-            shippingCost,
+            shippingCost: newShippingCost,
           } as CartItem,
         ];
       }
@@ -111,28 +131,52 @@ export const CartProvider = ({
   const updateItem = async (
     id: string,
     variant_id: number,
-    newQuantity: number,
-    shippingCost?: number
+    newQuantity: number
   ) => {
     const itemToUpdate = cartItems.find(
       (item) => item.id === id && item.variant_id === variant_id
     );
+
     if (!itemToUpdate) {
       // If the item doesn't exist, just return the previous state.
       return;
     }
 
-    const updatedShippingCost = await getShippingInfo(
+    const shippingCostData = await getShippingInfo(
       itemToUpdate,
       selectedCountry
     );
 
+    if (!shippingCostData) {
+      // Handle error, shipping cost data could not be fetched.
+      console.error("Failed to fetch shipping cost data");
+      return;
+    }
+
+    const { firstItemCost, additionalItemCost } = shippingCostData;
+
+    // Check if there is another item from the same print_provider in the cart
+    const otherItemFromProvider = cartItems.find(
+      (item) =>
+        item.print_provider_id === itemToUpdate.print_provider_id &&
+        item.id !== id &&
+        item.variant_id !== variant_id
+    );
+
+    let updatedShippingCost;
+    if (newQuantity === 1 && !otherItemFromProvider) {
+      // If quantity is 1 and there is no other item from the same print_provider, use firstItemCost
+      updatedShippingCost = firstItemCost;
+    } else {
+      // If quantity is more than 1, or there is another item from the same print_provider, calculate shipping cost accordingly
+      updatedShippingCost =
+        firstItemCost + additionalItemCost * (newQuantity - 1);
+    }
+
     const updatedItem: CartItem = {
       ...itemToUpdate,
       quantity: newQuantity,
-      shippingCost: updatedShippingCost
-        ? updatedShippingCost * newQuantity
-        : itemToUpdate.shippingCost,
+      shippingCost: updatedShippingCost,
     };
 
     setCartItems((prevItems) =>
@@ -142,23 +186,60 @@ export const CartProvider = ({
     );
   };
 
-  const removeItem = (id: string, variant_id: number) => {
-    setCartItems((prevItems) =>
-      prevItems.filter(
+  const removeItem = async (id: string, variant_id: number) => {
+    setCartItems((prevItems) => {
+      // Filter out the item to be removed
+      const remainingItems = prevItems.filter(
         (item) => !(item.id === id && item.variant_id === variant_id)
-      )
-    );
+      );
+
+      // Update the shipping cost of each remaining item
+      remainingItems.forEach(async (item) => {
+        await updateItem(item.id, item.variant_id, item.quantity);
+      });
+
+      return remainingItems;
+    });
   };
 
   const calculateShipping = async (country: string) => {
     const updatedItems: CartItem[] = [];
 
-    for (const item of cartItems) {
-      const shippingCost = await getShippingInfo(item, country);
+    // First, sort the items by print_provider_id
+    const sortedItems = [...cartItems].sort(
+      (a, b) => a.print_provider_id - b.print_provider_id
+    );
+
+    let previousProviderId = -1;
+
+    for (const item of sortedItems) {
+      const shippingCostData = await getShippingInfo(item, country);
+
+      if (!shippingCostData) {
+        // Handle error, shipping cost data could not be fetched.
+        console.error("Failed to fetch shipping cost data");
+        continue;
+      }
+
+      const { firstItemCost, additionalItemCost } = shippingCostData;
+
+      let updatedShippingCost;
+      if (item.print_provider_id !== previousProviderId) {
+        // This item is the first one from this provider
+        updatedShippingCost = firstItemCost;
+        previousProviderId = item.print_provider_id;
+      } else {
+        // This item is not the first one from this provider
+        updatedShippingCost = additionalItemCost;
+      }
+
+      updatedShippingCost += additionalItemCost * (item.quantity - 1);
+
       const updatedItem: CartItem = {
         ...item,
-        shippingCost: shippingCost ? shippingCost : item.shippingCost,
+        shippingCost: updatedShippingCost,
       };
+
       updatedItems.push(updatedItem);
     }
 
@@ -211,15 +292,10 @@ export const CartProvider = ({
         return; // Or handle this situation appropriately
       }
 
-      const shippingCost = profile.first_item.cost / 100; // assuming cost is in cents
+      const firstItemCost = profile.first_item.cost / 100; // assuming cost is in cents
       const additionalItemCost = profile.additional_items.cost / 100;
 
-      // Calculate total shipping cost based on quantity
-      // The cost for the first item plus the additional cost for any additional items
-      const totalShippingCost =
-        shippingCost + additionalItemCost * (item.quantity - 1);
-
-      return totalShippingCost;
+      return { firstItemCost, additionalItemCost };
     } catch (error) {
       console.error("Failed to fetch shipping information:", error);
     }
