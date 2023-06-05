@@ -20,7 +20,7 @@ const ShoppingCart = () => {
   };
 
   useEffect(() => {
-    calculateShipping(selectedCountry);
+    // calculateShipping(selectedCountry);
   }, [selectedCountry]);
 
   return (
@@ -63,7 +63,6 @@ const ShoppingCart = () => {
                     <div>${item.price}</div>
                     <div>{item.variant_id}</div>
                     <div>{item.blueprint_id}</div>
-                    <div>Shipping: ${item.shippingCost}</div>
                   </div>
                   <select
                     className="rounded-md px-1 h-6 bg-slate-200 border border-slate-300 text-slate-500"
@@ -71,12 +70,7 @@ const ShoppingCart = () => {
                     onChange={(e) => {
                       const newQuantity = Number(e.target.value);
                       if (newQuantity > 0) {
-                        updateItem(
-                          item.id,
-                          item.variant_id,
-                          newQuantity,
-                          item.shippingCost
-                        );
+                        updateItem(item.id, item.variant_id, newQuantity);
                       } else {
                         removeItem(item.id, item.variant_id);
                       }

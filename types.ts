@@ -98,6 +98,10 @@ export type Item = {
   image: string;
 };
 
+export type CartItem = Item & {
+  quantity: number;
+};
+
 export type CartContextType = {
   items: CartItem[];
   addItem: (item: Item) => void;
@@ -113,11 +117,6 @@ export type CartContextType = {
   getTotalPrice: () => void;
   selectedCountry: string;
   handleCountryChange: (e: ChangeEvent<HTMLSelectElement>) => void;
-};
-
-export type CartItem = Item & {
-  quantity: number;
-  shippingCosts: ShippingCosts;
 };
 
 export type ShoppingCartProps = {
@@ -139,10 +138,4 @@ export type ShippingProfile = {
 export type ShippingCostDetail = {
   cost: number;
   currency: string;
-};
-
-export type ShippingCosts = {
-  US: { firstItemCost: number; additionalItemCost: number };
-  CA: { firstItemCost: number; additionalItemCost: number };
-  Rest_of_the_world: { firstItemCost: number; additionalItemCost: number };
 };

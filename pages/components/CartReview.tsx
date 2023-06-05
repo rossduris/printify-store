@@ -35,7 +35,7 @@ const CartReview = ({ children }: CartReviewProps) => {
                   <img src={item.image} className=" w-24 h-24" />
                   <div>{item.name}</div>
                   <div>${item.price}</div>
-                  <div>shipping: ${item.shippingCost}</div>
+
                   <div>variant: {item.variant_id}</div>
                   <div>blueprint: {item.blueprint_id}</div>
                   <div>id:{item.id}</div>
@@ -47,7 +47,6 @@ const CartReview = ({ children }: CartReviewProps) => {
                     const newQuantity = Number(e.target.value);
                     if (newQuantity > 0) {
                       updateItem(item.id, item.variant_id, newQuantity);
-                      calculateShipping(e.target.value);
                     } else {
                       removeItem(item.id, item.variant_id);
                     }
