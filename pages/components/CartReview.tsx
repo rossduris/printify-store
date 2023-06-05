@@ -17,7 +17,20 @@ const CartReview = ({ children }: CartReviewProps) => {
     getShippingInfo,
     calculateShipping,
     getTotalPrice,
+    selectedCountry,
+    handleCountryChange,
   } = useCart();
+
+  const [shippingCost, setShippingCost] = useState("0.00");
+
+  useEffect(() => {
+    const fetchShippingCost = async () => {
+      const newShippingCost = await calculateShipping(selectedCountry, items);
+      setShippingCost(newShippingCost);
+    };
+
+    fetchShippingCost();
+  }, [selectedCountry, items]);
 
   return (
     <div>
@@ -28,20 +41,18 @@ const CartReview = ({ children }: CartReviewProps) => {
           {items.length ? (
             items.map((item: CartItem) => (
               <div
-                className="border border-gray-300 p-2 m-2 rounded-lg flex items-center gap-6"
+                className="border border-gray-300 p-2 rounded-lg flex items-center gap-6"
                 key={item.id + item.variant_id}
               >
                 <div>
                   <img src={item.image} className=" w-24 h-24" />
                   <div>{item.name}</div>
                   <div>${item.price}</div>
-
-                  <div>variant: {item.variant_id}</div>
-                  <div>blueprint: {item.blueprint_id}</div>
-                  <div>id:{item.id}</div>
+                  <div>{item.variant_id}</div>
+                  <div>{item.blueprint_id}</div>
                 </div>
                 <select
-                  className="rounded-md px-1 h-8 bg-slate-100 border border-slate-200 text-slate-500"
+                  className="rounded-md px-1 h-6 bg-slate-200 border border-slate-300 text-slate-500"
                   value={item.quantity}
                   onChange={(e) => {
                     const newQuantity = Number(e.target.value);
@@ -68,8 +79,12 @@ const CartReview = ({ children }: CartReviewProps) => {
           )}
           {getTotalPrice() !== null ? (
             <>
-              <div className=" p-4 text-xl rounded-lg mt-6 text-gray-600 flex justify-center">
-                Total Price: ${Number(getTotalPrice())}
+              <div className=" p-4 text-xl rounded-lg mt-2 text-gray-600">
+                Shipping: ${shippingCost}
+              </div>
+
+              <div className=" p-4 text-xl rounded-lg mt-6 text-gray-600">
+                Total Price: ${Number(getTotalPrice()) + Number(shippingCost)}
               </div>
               <div className="w-full flex justify-center mt-8 h-20">
                 {children}

@@ -36,7 +36,6 @@ const ShippingForm = () => {
     } as Address,
     validationSchema,
     onSubmit: (values, { setSubmitting }) => {
-      calculateShipping(values.country);
       setSubmitting(false);
       console.log(values);
       // Here you can call the function to calculate the shipping and handle the next checkout steps
@@ -150,7 +149,6 @@ const ShippingForm = () => {
                 onChange={(e) => {
                   formik.handleChange(e);
                   handleCountryChange(e);
-                  calculateShipping(e.target.value);
                 }}
               >
                 <option value="" disabled>

@@ -23,6 +23,17 @@ const ShoppingCart = () => {
     // calculateShipping(selectedCountry);
   }, [selectedCountry]);
 
+  const [shippingCost, setShippingCost] = useState("0.00");
+
+  useEffect(() => {
+    const fetchShippingCost = async () => {
+      const newShippingCost = await calculateShipping(selectedCountry, items);
+      setShippingCost(newShippingCost);
+    };
+
+    fetchShippingCost();
+  }, [selectedCountry, items]);
+
   return (
     <>
       <div
@@ -104,9 +115,14 @@ const ShoppingCart = () => {
               </select>
             </div>
 
-            <div className=" p-4 text-xl rounded-lg mt-6 text-gray-600">
-              Total Price: ${Number(getTotalPrice())}
+            <div className=" p-4 text-xl rounded-lg mt-2 text-gray-600">
+              Shipping: ${shippingCost}
             </div>
+
+            <div className=" p-4 text-xl rounded-lg mt-6 text-gray-600">
+              Total Price: ${Number(getTotalPrice()) + Number(shippingCost)}
+            </div>
+
             {items.length > 0 ? (
               <a className=" $ btn btn-primary w-full mt-4" href="/checkout">
                 Checkout

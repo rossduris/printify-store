@@ -104,19 +104,27 @@ export type CartItem = Item & {
 
 export type CartContextType = {
   items: CartItem[];
-  addItem: (item: Item) => void;
-  removeItem: (id: string, variant_id: number) => void;
+  addItem: (item: Item) => Promise<void>;
+  removeItem: (id: string, variant_id: number) => Promise<void>;
   updateItem: (
     id: string,
     variant_id: number,
-    quantity: number,
-    shippingCost?: number
-  ) => void;
-  getShippingInfo: (item: CartItem, country: string) => void;
-  calculateShipping: (country: string) => void;
-  getTotalPrice: () => void;
+    quantity: number
+  ) => Promise<void>;
+  getShippingInfo: (
+    item: CartItem,
+    country: string
+  ) => Promise<
+    { firstItemCost: number; additionalItemCost: number } | undefined
+  >;
+  calculateShipping: (
+    country: string,
+    cartItems: CartItem[]
+  ) => Promise<string>;
+  getTotalPrice: () => string;
   selectedCountry: string;
   handleCountryChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+  shippingCost: string;
 };
 
 export type ShoppingCartProps = {

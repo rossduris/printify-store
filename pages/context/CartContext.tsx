@@ -6,22 +6,19 @@ import {
   useEffect,
   ChangeEvent,
 } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 const initValue: CartContextType = {
   items: [],
-  addItem: () => {},
-  removeItem: () => {},
-  updateItem: (
-    id: string,
-    variant_id: number,
-    quantity: number,
-    shippingCost?: number
-  ) => {},
-  calculateShipping: (country: string) => {},
-  getShippingInfo: (item: CartItem, country: string) => {},
-  getTotalPrice: () => {},
+  addItem: async (item: Item) => {},
+  removeItem: async (id: string, variant_id: number) => {},
+  updateItem: async (id: string, variant_id: number, newQuantity: number) => {},
+  calculateShipping: async (country: string, cartItems: CartItem[]) => "",
+  getShippingInfo: async (item: CartItem, country: string) => undefined,
+  getTotalPrice: () => "",
   selectedCountry: "",
   handleCountryChange: (e: ChangeEvent<HTMLSelectElement>) => {},
+  shippingCost: "",
 };
 
 const CartContext = createContext<CartContextType>(initValue);
@@ -33,6 +30,7 @@ export const CartProvider = ({
   children: React.ReactNode;
   initialItems: Item[];
 }) => {
+  const [shippingCost, setShippingCost] = useState<string>("");
   const [cartItems, setCartItems] = useState<CartItem[]>(
     initialItems.map((item) => ({ ...item, quantity: 1 }))
   );
@@ -46,6 +44,7 @@ export const CartProvider = ({
     initialCountry = "US";
   }
 
+  const [updatingShipping, setUpdatingShipping] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(initialCountry);
 
   useEffect(() => {
@@ -75,40 +74,25 @@ export const CartProvider = ({
   };
 
   const addItem = async (item: Item) => {
-    const cartItem = { ...item, quantity: 1 }; // Set default quantity to 1
+    const updatedCartItems = [
+      ...cartItems,
+      { ...item, quantity: 1, cartItemId: uuidv4() },
+    ];
+    setCartItems(updatedCartItems);
 
-    setCartItems((prevItems) => {
-      // Check if this exact item already exists in the cart
-      const existingItem = prevItems.find(
-        (i) => i.id === item.id && i.variant_id === item.variant_id
-      );
+    // Calculate the new shipping cost
+    const newShippingCost = await calculateShipping(
+      selectedCountry,
+      updatedCartItems
+    );
+    setShippingCost(newShippingCost);
 
-      // Check if there are other items from the same provider
-      const otherItemsFromProvider = prevItems.filter(
-        (i) =>
-          i.print_provider_id === item.print_provider_id &&
-          (i.id !== item.id || i.variant_id !== item.variant_id)
-      );
-
-      if (existingItem) {
-        return prevItems.map((i) =>
-          i.id === item.id && i.variant_id === item.variant_id
-            ? {
-                ...i,
-                quantity: i.quantity + 1,
-              }
-            : i
-        );
-      } else {
-        return [
-          ...prevItems,
-          {
-            ...item,
-            quantity: 1,
-          } as CartItem,
-        ];
-      }
-    });
+    // Store the new shipping cost in localStorage
+    try {
+      localStorage.setItem("shippingCost", newShippingCost.toString());
+    } catch (error) {
+      console.error("Failed to save shipping cost in localStorage:", error);
+    }
   };
 
   const updateItem = async (
@@ -124,18 +108,43 @@ export const CartProvider = ({
       // If the item doesn't exist, just return the previous state.
       return;
     }
+    console.log("updated quantity to ", newQuantity);
 
     const updatedItem: CartItem = {
       ...itemToUpdate,
       quantity: newQuantity,
     };
 
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id && item.variant_id === variant_id ? updatedItem : item
-      )
+    const updatedCartItems = cartItems.map((item) =>
+      item.id === id && item.variant_id === variant_id ? updatedItem : item
     );
+
+    setCartItems(updatedCartItems);
   };
+
+  useEffect(() => {
+    const calculateNewShippingCost = async () => {
+      setUpdatingShipping(true);
+      // After the cart items are updated, calculate the new shipping cost
+      const newShippingCost = await calculateShipping(
+        selectedCountry,
+        cartItems
+      );
+      setShippingCost(newShippingCost);
+
+      // Store the new shipping cost in localStorage
+      try {
+        localStorage.setItem("shippingCost", newShippingCost.toString());
+      } catch (error) {
+        console.error("Failed to save shipping cost in localStorage:", error);
+      }
+      setUpdatingShipping(false);
+    };
+
+    if (!updatingShipping) {
+      calculateNewShippingCost();
+    }
+  }, []);
 
   const removeItem = async (id: string, variant_id: number) => {
     setCartItems((prevItems) => {
@@ -148,10 +157,47 @@ export const CartProvider = ({
     });
   };
 
-  const calculateShipping = async (country: string) => {
-    const updatedItems: CartItem[] = [];
+  const calculateShipping = async (country: string, cartItems: CartItem[]) => {
+    // Create a map to track shipping costs by print_provider_id
+    const shippingCostsByProvider: { [key: string]: number } = {};
 
-    setCartItems(updatedItems);
+    for (let item of cartItems) {
+      const shippingCostDataString = localStorage.getItem(
+        `${item.blueprint_id}_${item.print_provider_id}`
+      );
+
+      let shippingCostData;
+
+      if (shippingCostDataString) {
+        console.log("using prev shipping cost");
+        shippingCostData = JSON.parse(shippingCostDataString);
+      } else {
+        console.log("getting new shipping cost");
+        shippingCostData = await getShippingInfo(item, country);
+
+        if (!shippingCostData) {
+          continue; // Skip this item if there's no shipping data
+        }
+      }
+
+      const existingCost = shippingCostsByProvider[item.print_provider_id] || 0;
+
+      // If it's the first item from this print provider, use firstItemCost, otherwise use additionalItemCost
+      const newCost =
+        existingCost === 0
+          ? shippingCostData.firstItemCost
+          : shippingCostData.additionalItemCost;
+
+      shippingCostsByProvider[item.print_provider_id] = existingCost + newCost;
+    }
+
+    // Calculate the total shipping cost by summing up the costs for each provider
+    const totalShippingCost = Object.values(shippingCostsByProvider).reduce(
+      (a, b) => a + b,
+      0
+    );
+
+    return totalShippingCost.toFixed(2); // Assuming we want to keep 2 decimal places
   };
 
   const getShippingInfo = async (item: CartItem, country: string) => {
@@ -200,8 +246,14 @@ export const CartProvider = ({
         return; // Or handle this situation appropriately
       }
 
-      const firstItemCost = profile.first_item.cost / 100; // assuming cost is in cents
+      const firstItemCost = profile.first_item.cost / 100;
       const additionalItemCost = profile.additional_items.cost / 100;
+
+      // Save the costs as an object with a specific key for this item and country
+      localStorage.setItem(
+        `${item.print_provider_id}_${item.blueprint_id}_${item.variant_id}_${country}`,
+        JSON.stringify({ firstItemCost, additionalItemCost })
+      );
 
       return { firstItemCost, additionalItemCost };
     } catch (error) {
@@ -230,6 +282,7 @@ export const CartProvider = ({
         calculateShipping,
         getShippingInfo,
         getTotalPrice,
+        shippingCost,
       }}
     >
       {children}
