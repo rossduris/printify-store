@@ -71,7 +71,7 @@ const ShoppingCart = () => {
               Object.values(groupedItems).map((item: CartItem) => (
                 <div
                   className="border border-gray-300 p-2 rounded-lg flex items-center gap-6"
-                  key={item.product_id + item.variant_id + item.quantity}
+                  key={item.product_id + item.variant_id}
                 >
                   <div>
                     <img src={item.image} className=" w-24 h-24" />
