@@ -1,5 +1,4 @@
 import { ChangeEvent } from "react";
-import { object } from "yup";
 
 export type ShopProduct = {
   blueprint_id: number;
@@ -89,7 +88,7 @@ export type PrintifyOrder = {
 };
 
 export type Item = {
-  id: string;
+  product_id: string;
   name: string;
   price: number;
   variant_id: number;
@@ -125,6 +124,7 @@ export type CartContextType = {
   selectedCountry: string;
   handleCountryChange: (e: ChangeEvent<HTMLSelectElement>) => void;
   shippingCost: string;
+  totalItems: number;
 };
 
 export type ShoppingCartProps = {
@@ -146,4 +146,9 @@ export type ShippingProfile = {
 export type ShippingCostDetail = {
   cost: number;
   currency: string;
+};
+
+export type CartProviderProps = {
+  children: React.ReactNode;
+  initialItems: Item[];
 };

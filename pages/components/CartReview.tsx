@@ -42,10 +42,11 @@ const CartReview = ({ children }: CartReviewProps) => {
             items.map((item: CartItem) => (
               <div
                 className="border border-gray-300 p-2 rounded-lg flex items-center gap-6"
-                key={item.id + item.variant_id}
+                key={item.product_id + item.variant_id}
               >
                 <div>
                   <img src={item.image} className=" w-24 h-24" />
+                  <div>{item.product_id}</div>
                   <div>{item.name}</div>
                   <div>${item.price}</div>
                   <div>{item.variant_id}</div>
@@ -57,9 +58,9 @@ const CartReview = ({ children }: CartReviewProps) => {
                   onChange={(e) => {
                     const newQuantity = Number(e.target.value);
                     if (newQuantity > 0) {
-                      updateItem(item.id, item.variant_id, newQuantity);
+                      updateItem(item.product_id, item.variant_id, newQuantity);
                     } else {
-                      removeItem(item.id, item.variant_id);
+                      removeItem(item.product_id, item.variant_id);
                     }
                   }}
                 >
@@ -69,7 +70,9 @@ const CartReview = ({ children }: CartReviewProps) => {
                     </option>
                   ))}
                 </select>
-                <button onClick={() => removeItem(item.id, item.variant_id)}>
+                <button
+                  onClick={() => removeItem(item.product_id, item.variant_id)}
+                >
                   X
                 </button>
               </div>

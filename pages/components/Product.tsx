@@ -60,7 +60,7 @@ const SelectVariant = React.memo(
             className=" btn btn-primary"
             onClick={() =>
               addItem({
-                id: product.id,
+                product_id: product.id,
                 name:
                   product.title +
                   ", " +
