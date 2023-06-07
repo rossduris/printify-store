@@ -131,3 +131,10 @@ body {
 select {
   color: rgb(75, 75, 75);
 }
+.cartSummary {
+  max-width: 400px;
+}
+.cartSummary > div {
+  display: flex;
+  justify-content: space-between;
+}

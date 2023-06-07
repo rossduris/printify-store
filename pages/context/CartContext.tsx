@@ -199,7 +199,7 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
       } else {
         console.log("getting new shipping cost");
         shippingCostData = await getShippingInfo(item, country);
-
+        console.log(shippingCostData);
         if (!shippingCostData) {
           continue; // Skip this item if there's no shipping data
         }
@@ -246,6 +246,8 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
         }),
       });
       const data = await response.json();
+
+      console.log(data);
 
       const restOfTheWorldProfile = data.profiles.find(
         (profile: ShippingProfile) =>

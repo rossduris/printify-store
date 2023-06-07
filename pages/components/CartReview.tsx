@@ -82,12 +82,36 @@ const CartReview = ({ children }: CartReviewProps) => {
           )}
           {getTotalPrice() !== null ? (
             <>
-              <div className=" p-4 text-xl rounded-lg mt-2 text-gray-600">
-                Shipping: ${shippingCost}
-              </div>
+              <div className="cartSummary">
+                <div className=" p-1 text-sm rounded-lg mt-2 text-gray-600">
+                  <span>Items:</span> <span>${Number(getTotalPrice())}</span>
+                </div>
+                <div className=" p-1 text-sm rounded-lg mt-2 text-gray-600 border-b border-gray-200">
+                  <span> Shipping & Handling:</span>
+                  <span> ${shippingCost}</span>
+                </div>
 
-              <div className=" p-4 text-xl rounded-lg mt-6 text-gray-600">
-                Total Price: ${Number(getTotalPrice()) + Number(shippingCost)}
+                <div className=" p-1 text-sm mt-2 text-gray-600 ">
+                  <span>Total before tax: </span>
+                  <span>${Number(getTotalPrice()) + Number(shippingCost)}</span>
+                </div>
+
+                <div className=" p-1 text-sm rounded-lg mt-2 text-gray-600">
+                  <span>Estimated tax to be collected: </span>
+                  <span>${(Number(getTotalPrice()) * 0.08).toFixed(2)}</span>
+                </div>
+
+                <div className=" p-1 text-lg pt-8 mt-6 text-gray-600 border-t broder-gray-200">
+                  <span> Order total: </span>
+                  <span>
+                    $
+                    {(
+                      Number(getTotalPrice()) +
+                      Number(shippingCost) +
+                      Number(getTotalPrice()) * 0.08
+                    ).toFixed(2)}
+                  </span>
+                </div>
               </div>
               <div className="w-full flex justify-center mt-8 h-20">
                 {children}
