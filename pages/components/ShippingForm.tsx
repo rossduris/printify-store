@@ -151,9 +151,7 @@ const ShippingForm = () => {
                   handleCountryChange(e);
                 }}
               >
-                <option value="" disabled>
-                  Select...
-                </option>
+                {/* <option disabled>Select...</option> */}
                 <option value="US">United States</option>
                 <option value="CA">Canada</option>
                 <option value="GB">United Kingdom</option>
@@ -213,7 +211,7 @@ const ShippingForm = () => {
         </div>
         <CartReview>
           <button type="submit" className="btn btn-primary absolute">
-            Go To Payment
+            Proceed to Payment
           </button>
         </CartReview>
       </div>

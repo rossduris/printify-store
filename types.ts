@@ -103,13 +103,9 @@ export type CartItem = Item & {
 
 export type CartContextType = {
   items: CartItem[];
-  addItem: (item: Item) => Promise<void>;
-  removeItem: (id: string, variant_id: number) => Promise<void>;
-  updateItem: (
-    id: string,
-    variant_id: number,
-    quantity: number
-  ) => Promise<void>;
+  addItem: (item: Item) => void;
+  removeItem: (id: string, variant_id: number) => void;
+  updateItem: (id: string, variant_id: number, quantity: number) => void;
   getShippingInfo: (
     item: CartItem,
     country: string
@@ -125,6 +121,7 @@ export type CartContextType = {
   handleCountryChange: (e: ChangeEvent<HTMLSelectElement>) => void;
   shippingCost: string;
   totalItems: number;
+  isAdding: boolean;
 };
 
 export type ShoppingCartProps = {

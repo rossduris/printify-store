@@ -1,9 +1,6 @@
 import { CartItem } from "@/types";
 import React, { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
-import axios from "axios";
-import { loadStripe } from "@stripe/stripe-js";
-import getStripe from "../utils/stripe";
 
 type CartReviewProps = {
   children: React.ReactNode;
@@ -14,11 +11,10 @@ const CartReview = ({ children }: CartReviewProps) => {
     items,
     updateItem,
     removeItem,
-    getShippingInfo,
+
     calculateShipping,
     getTotalPrice,
     selectedCountry,
-    handleCountryChange,
   } = useCart();
 
   const [shippingCost, setShippingCost] = useState("0.00");
@@ -31,6 +27,19 @@ const CartReview = ({ children }: CartReviewProps) => {
 
     fetchShippingCost();
   }, [selectedCountry, items]);
+
+  const groupedItems: Map<string, CartItem> = items.reduce((acc, item) => {
+    const key = `${item.product_id}_${item.variant_id}`;
+    if (acc.has(key)) {
+      const existingItem = acc.get(key);
+      existingItem!.quantity += 1;
+    } else {
+      acc.set(key, { ...item, quantity: 1 });
+    }
+    return acc;
+  }, new Map<string, CartItem>());
+
+  const cartItems: CartItem[] = Array.from(groupedItems.values());
 
   return (
     <div>

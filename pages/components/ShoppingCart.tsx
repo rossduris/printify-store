@@ -8,36 +8,16 @@ const ShoppingCart = () => {
     updateItem,
     removeItem,
     getTotalPrice,
-    getShippingInfo,
-    calculateShipping,
     selectedCountry,
     handleCountryChange,
     totalItems,
+    shippingCost,
   } = useCart();
   const [cartVisible, setCartVisible] = useState(false);
 
   const toggleCart = () => {
     setCartVisible(!cartVisible);
   };
-
-  useEffect(() => {
-    const fetchShippingCost = async () => {
-      const cost = await calculateShipping(selectedCountry, items);
-      setShippingCost(cost);
-    };
-
-    fetchShippingCost();
-  }, [selectedCountry, items, calculateShipping, totalItems]);
-
-  const [shippingCost, setShippingCost] = useState("0.00");
-
-  const groupedItems = items.reduce((acc, item) => {
-    const key = `${item.product_id}_${item.variant_id}`;
-    if (!acc[key]) {
-      acc[key] = { ...item };
-    }
-    return acc;
-  }, {} as Record<string, CartItem>);
 
   return (
     <>
@@ -52,7 +32,7 @@ const ShoppingCart = () => {
       >
         <div
           onClick={toggleCart}
-          className="absolute bg-white top-6 right-10 z-50 cursor-pointer border border-gray-400 h-10 w-14 flex justify-center items-center select-none rounded-full"
+          className="absolute bg-white top-2 right-10 z-50 cursor-pointer border border-gray-400 h-10 w-20 flex justify-center items-center select-none rounded-full"
         >
           {!cartVisible ? `Cart: ${totalItems}` : "X"}
         </div>
@@ -60,32 +40,28 @@ const ShoppingCart = () => {
         <div
           className={`${
             !cartVisible ? "cartShow" : "cartHide"
-          } bg-white right-0 w-[400px] p-4  min-h-12  absolute top-0 overflow-scroll shadow-xl h-[100vh]`}
+          } bg-white right-0 w-[500px] flex items-center flex-col p-4  min-h-12  absolute top-0 overflow-scroll shadow-xl h-[100vh] display`}
         >
-          <h3 className="text-2xl font-bold w-full p-6">
-            Cart: {totalItems} Items
-          </h3>
+          <h3 className="text-2xl font-bold  pb-6 ">Cart {totalItems} Items</h3>
 
           <div>
-            {Object.values(groupedItems).length ? (
-              Object.values(groupedItems).map((item: CartItem) => (
+            {items.length ? (
+              items.map((item: CartItem) => (
                 <div
-                  className="border border-gray-300 p-2 rounded-lg flex items-center gap-6"
+                  className="border border-gray-300 p-2 rounded-lg flex items-center gap-6 my-6"
                   key={item.product_id + item.variant_id}
                 >
+                  <img src={item.image} className=" w-24 h-24" />
                   <div>
-                    <img src={item.image} className=" w-24 h-24" />
                     <div>{item.name}</div>
-                    <div>{item.product_id}</div>
-                    <div>${item.price}</div>
-                    <div>{item.variant_id}</div>
-                    <div>{item.blueprint_id}</div>
                   </div>
+                  <div>${item.price}</div>
                   <select
                     className="rounded-md px-1 h-6 bg-slate-200 border border-slate-300 text-slate-500"
                     value={item.quantity}
                     onChange={(e) => {
                       const newQuantity = Number(e.target.value);
+                      console.log(newQuantity);
                       if (newQuantity > 0) {
                         updateItem(
                           item.product_id,
@@ -97,12 +73,13 @@ const ShoppingCart = () => {
                       }
                     }}
                   >
-                    {[...Array(10).keys()].map((value) => (
-                      <option key={value + 1} value={value + 1}>
-                        {value + 1}
+                    {[...Array(11).keys()].map((value) => (
+                      <option key={value} value={value}>
+                        {value}
                       </option>
                     ))}
                   </select>
+
                   <button
                     onClick={() => removeItem(item.product_id, item.variant_id)}
                   >
@@ -114,12 +91,12 @@ const ShoppingCart = () => {
               <div>No items</div>
             )}
             <div className=" pt-6">
-              <label htmlFor="countrySelect">Shipping Country: </label>
+              <label htmlFor="countrySelect">Delivery Country: </label>
               <select
                 id="countrySelect"
                 value={selectedCountry}
                 onChange={handleCountryChange}
-                className=" select bg-slate-200 border border-slate-300 text-slate-500"
+                className=" p-2 m-4 mb-8 rounded-md bg-slate-200 border border-slate-300 text-slate-500 "
               >
                 <option value="US">United States</option>
                 <option value="CA">Canada</option>
@@ -128,7 +105,8 @@ const ShoppingCart = () => {
             </div>
             <div className="cartSummary">
               <div className=" p-1 text-sm rounded-lg mt-2 text-gray-600">
-                <span>Items:</span> <span>${Number(getTotalPrice())}</span>
+                <span>Items:</span>
+                <span>${Number(getTotalPrice()).toFixed(2)}</span>
               </div>
               <div className=" p-1 text-sm rounded-lg mt-2 text-gray-600 border-b border-gray-200">
                 <span>Shipping & Handling:</span>
@@ -137,7 +115,9 @@ const ShoppingCart = () => {
 
               <div className=" p-1 text-sm mt-2 text-gray-600 ">
                 <span>Subtotal before tax: </span>
-                <span>${Number(getTotalPrice()) + Number(shippingCost)}</span>
+                <span>
+                  ${(Number(getTotalPrice()) + Number(shippingCost)).toFixed(2)}
+                </span>
               </div>
 
               <div className=" p-1 text-sm rounded-lg mt-2 text-gray-600">
@@ -159,7 +139,7 @@ const ShoppingCart = () => {
             </div>
             {items.length > 0 ? (
               <a className=" $ btn btn-primary w-full mt-4" href="/checkout">
-                Checkout
+                Proceed to Checkout
               </a>
             ) : (
               ""

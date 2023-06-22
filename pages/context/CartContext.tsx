@@ -11,13 +11,14 @@ import {
   useState,
   useEffect,
   ChangeEvent,
+  useMemo,
 } from "react";
 
 const initValue: CartContextType = {
   items: [],
-  addItem: async (item: Item) => {},
-  removeItem: async (id: string, variant_id: number) => {},
-  updateItem: async (id: string, variant_id: number, newQuantity: number) => {},
+  addItem: (item: Item) => {},
+  removeItem: (id: string, variant_id: number) => {},
+  updateItem: (id: string, variant_id: number, newQuantity: number) => {},
   calculateShipping: async (country: string, cartItems: CartItem[]) => "",
   getShippingInfo: async (item: CartItem, country: string) => undefined,
   getTotalPrice: () => "",
@@ -25,6 +26,7 @@ const initValue: CartContextType = {
   handleCountryChange: (e: ChangeEvent<HTMLSelectElement>) => {},
   shippingCost: "",
   totalItems: 0,
+  isAdding: false,
 };
 
 const CartContext = createContext<CartContextType>(initValue);
@@ -35,14 +37,19 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
     initialItems.map((item) => ({ ...item, quantity: 1 }))
   );
   const [isMounted, setIsMounted] = useState(false);
-  const [totalItems, setTotalItems] = useState(0);
+
+  const totalItems = useMemo(() => {
+    return cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  }, [cartItems]);
+
+  const [isAdding, setIsAdding] = useState(false);
 
   // Load initial country from localStorage or default to 'US'
   let initialCountry;
   try {
     initialCountry = localStorage.getItem("selectedCountry") || "US";
   } catch {
-    initialCountry = "US";
+    initialCountry = "";
   }
 
   const [selectedCountry, setSelectedCountry] = useState(initialCountry);
@@ -52,10 +59,10 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
     if (storedItems) {
       const parsedItems = JSON.parse(storedItems) as CartItem[];
       setCartItems(parsedItems);
-
-      // calculate totalItems
-      const total = parsedItems.reduce((sum, item) => sum + item.quantity, 0);
-      setTotalItems(total);
+    }
+    const storedShippingCost = localStorage.getItem("shippingCost");
+    if (storedShippingCost) {
+      setShippingCost(storedShippingCost);
     }
     setIsMounted(true);
   }, []);
@@ -64,24 +71,24 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
     if (!isMounted) return;
 
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    localStorage.setItem("shippingCost", shippingCost);
 
-    const fetchShippingCost = async () => {
-      const newShippingCost = await calculateShipping(
-        selectedCountry,
-        cartItems
-      );
-      setShippingCost(newShippingCost);
+    if (shippingCost === "") {
+      // Only fetch initial shipping cost if it hasn't been calculated yet
+      calculateAndSetShippingCost();
+    }
+  }, [selectedCountry, cartItems, isMounted, shippingCost]);
 
-      // Store the new shipping cost in localStorage
-      try {
-        localStorage.setItem("shippingCost", newShippingCost.toString());
-      } catch (error) {
-        console.error("Failed to save shipping cost in localStorage:", error);
-      }
-    };
+  const calculateAndSetShippingCost = async () => {
+    const shipping = await calculateShipping(selectedCountry, cartItems);
+    setShippingCost(shipping);
+  };
 
-    fetchShippingCost();
-  }, [selectedCountry, cartItems, isMounted]);
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      calculateAndSetShippingCost();
+    }
+  }, [cartItems, selectedCountry]);
 
   const handleCountryChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const newCountry = e.target.value;
@@ -95,33 +102,57 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
     }
   };
 
-  const addItem = async (item: Item) => {
+  //Old code that didn't work...
+  // const addItem = (item: Item) => {
+  //   setCartItems((prevItems) => {
+  //     // Check if item already exists in the cart
+  //     const existingItemIndex = prevItems.findIndex(
+  //       (prevItem) =>
+  //         prevItem.product_id === item.product_id &&
+  //         prevItem.variant_id === item.variant_id
+  //     );
+
+  //     // If it does, increase its quantity
+  //     if (existingItemIndex > -1) {
+  //       const newItems = [...prevItems];
+  //       newItems[existingItemIndex].quantity =
+  //         (newItems[existingItemIndex].quantity || 0) + 1;
+  //       return newItems;
+  //     }
+
+  //     // If it doesn't, add it to the cart with quantity 1
+  //     return [...prevItems, { ...item, quantity: 1 }];
+  //   });
+  // };
+  //look into for why it occured
+
+  const addItem = (item: Item) => {
     setCartItems((prevItems) => {
-      // Check if the item already exists in the cart.
-      const existingItemIndex = prevItems.findIndex(
-        (i) =>
-          i.product_id === item.product_id && i.variant_id === item.variant_id
-      );
+      let itemExists = false;
 
-      if (existingItemIndex > -1) {
-        // If the item already exists, update its quantity.
-        const newItems = [...prevItems];
-        newItems[existingItemIndex].quantity = Math.min(
-          newItems[existingItemIndex].quantity + 1,
-          10
-        );
-        return newItems;
-      } else {
-        // If the item doesn't exist, add it to the cart.
-        return [...prevItems, { ...item, quantity: 1 }];
+      const newItems = prevItems.map((prevItem) => {
+        if (
+          prevItem.product_id === item.product_id &&
+          prevItem.variant_id === item.variant_id
+        ) {
+          itemExists = true;
+          return {
+            ...prevItem,
+            quantity: (prevItem.quantity || 0) + 1,
+          };
+        }
+        return prevItem;
+      });
+
+      if (!itemExists) {
+        newItems.push({ ...item, quantity: 1 });
       }
-    });
 
-    // Then, increment the total items count
-    setTotalItems((prevItemsCount) => prevItemsCount + 1);
+      return newItems;
+    });
   };
 
-  const updateItem = async (
+  const updateItem = (
     product_id: string,
     variant_id: number,
     newQuantity: number
@@ -132,6 +163,8 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
         (item) =>
           item.product_id === product_id && item.variant_id === variant_id
       );
+
+      console.log(`Index of item to update: ${itemIndex}`);
 
       if (itemIndex === -1) {
         // If the item doesn't exist, just return the previous state.
@@ -144,47 +177,34 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
         quantity: newQuantity,
       };
 
+      console.log(`Updated item: ${JSON.stringify(updatedItem)}`);
+
       // Create a new array with the updated item
-      const updatedItems = [
+      const newItems = [
         ...prevItems.slice(0, itemIndex),
         updatedItem,
         ...prevItems.slice(itemIndex + 1),
       ];
 
-      // Adjust the total items count
-      setTotalItems(updatedItems.reduce((sum, item) => sum + item.quantity, 0));
+      console.log(`New items array: ${JSON.stringify(newItems)}`);
 
-      const getShippingCost = async () => {
-        const shipping = await calculateShipping(selectedCountry, cartItems);
-        setShippingCost(shipping);
-      };
-
-      getShippingCost();
-
-      // Return the new array
-      return updatedItems;
+      return newItems;
     });
   };
 
   const removeItem = async (product_id: string, variant_id: number) => {
     setCartItems((prevItems) => {
       // Filter out the item to be removed
-      const remainingItems = prevItems.filter(
+      return prevItems.filter(
         (item) =>
           !(item.product_id === product_id && item.variant_id === variant_id)
       );
-
-      setTotalItems(
-        remainingItems.reduce((sum, item) => sum + item.quantity, 0)
-      );
-
-      return remainingItems;
     });
   };
 
   const calculateShipping = async (country: string, cartItems: CartItem[]) => {
-    // Create a map to track shipping costs by print_provider_id
     const shippingCostsByProvider: { [key: string]: number } = {};
+    const requests = [];
 
     for (let item of cartItems) {
       const shippingCostDataString = localStorage.getItem(
@@ -196,40 +216,36 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
       if (shippingCostDataString) {
         console.log("using prev shipping cost");
         shippingCostData = JSON.parse(shippingCostDataString);
+        requests.push({ item, shippingCostData });
       } else {
         console.log("getting new shipping cost");
-        shippingCostData = await getShippingInfo(item, country);
-        console.log(shippingCostData);
-        if (!shippingCostData) {
-          continue; // Skip this item if there's no shipping data
-        }
+        const request = getShippingInfo(item, country).then(
+          (shippingCostData) => ({ item, shippingCostData })
+        );
+        requests.push(request);
       }
+    }
 
+    const results = await Promise.all(requests);
+
+    results.forEach(({ item, shippingCostData }) => {
       const existingCost = shippingCostsByProvider[item.print_provider_id] || 0;
 
-      // Calculate newCost based on the quantity of the item
       const newCost =
         existingCost === 0
           ? shippingCostData.firstItemCost +
             shippingCostData.additionalItemCost * (item.quantity - 1)
           : existingCost + shippingCostData.additionalItemCost * item.quantity;
 
-      console.log(
-        existingCost === 0
-          ? "first item cost used: " + shippingCostData.firstItemCost
-          : "additional item cost used: " + shippingCostData.additionalItemCost
-      );
-
       shippingCostsByProvider[item.print_provider_id] = newCost;
-    }
+    });
 
-    // Calculate the total shipping cost by summing up the costs for each provider
     const totalShippingCost = Object.values(shippingCostsByProvider).reduce(
       (a, b) => a + b,
       0
     );
 
-    return totalShippingCost.toFixed(2); // Assuming we want to keep 2 decimal places
+    return totalShippingCost.toFixed(2);
   };
 
   const getShippingInfo = async (item: CartItem, country: string) => {
@@ -318,6 +334,7 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
         getShippingInfo,
         getTotalPrice,
         shippingCost,
+        isAdding,
       }}
     >
       {children}

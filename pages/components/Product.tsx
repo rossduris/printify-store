@@ -30,7 +30,7 @@ const SelectVariant = React.memo(
     selectedVariant,
     setSelectedVariant,
   }: SelectVariantProps) => {
-    const { addItem, items } = useCart();
+    const { addItem } = useCart();
 
     return (
       <div className="flex items-center flex-col p-4 relative">
@@ -41,7 +41,6 @@ const SelectVariant = React.memo(
             product.variants[0]?.id
           }
           onChange={(e) => {
-            // setPreviousVariant(Number(e.target.value.split("-")[0]));
             setSelectedVariant(Number(e.target.value.split("-")[0]));
           }}
         >
@@ -56,22 +55,19 @@ const SelectVariant = React.memo(
             : "Loading variants..."}
         </select>
         <div className="flex justify-between pt-4 w-full">
-          <label
+          <button
             className=" btn btn-primary"
-            onClick={() =>
+            onClick={() => {
+              const selectedVariantObj = variants.find(
+                (v) => v.id === selectedVariant
+              );
+              if (!selectedVariantObj) return; // or handle this case as you wish
+
               addItem({
                 product_id: product.id,
-                name:
-                  product.title +
-                  ", " +
-                  variants.find((v) => v.id === selectedVariant)?.title,
-                price:
-                  Number(
-                    variants.find((v) => v.id === selectedVariant)?.price
-                  ) / 100,
-                variant_id: Number(
-                  variants.find((v) => v.id === selectedVariant)?.id
-                ),
+                name: product.title + ", " + selectedVariantObj?.title,
+                price: Number(selectedVariantObj?.price) / 100,
+                variant_id: Number(selectedVariantObj?.id),
                 blueprint_id: Number(product.blueprint_id),
                 print_provider_id: Number(product.print_provider_id),
                 image: String(
@@ -79,11 +75,12 @@ const SelectVariant = React.memo(
                     image.variant_ids.includes(Number(selectedVariant))
                   )[0].src
                 ),
-              })
-            }
+              });
+            }}
           >
             Add to cart
-          </label>
+          </button>
+
           <label htmlFor="my-modal" className="btn">
             Quick Look
           </label>

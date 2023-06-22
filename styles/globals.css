@@ -108,7 +108,7 @@ body {
 }
 
 .cartShow {
-  right: -400px;
+  right: -500px;
   transition: all 0.25s ease-in-out;
 }
 
@@ -133,6 +133,9 @@ select {
 }
 .cartSummary {
   max-width: 400px;
+  left: 50%;
+  position: relative;
+  transform: translate(-50%, 0);
 }
 .cartSummary > div {
   display: flex;
