@@ -115,21 +115,30 @@ export type CartContextType = {
   calculateShipping: (
     country: string,
     cartItems: CartItem[]
-  ) => Promise<string>;
+  ) => Promise<{
+    totalShippingCost: string;
+    handlingTimesByProvider: { [key: string]: HandlingTime };
+  }>;
   getTotalPrice: () => string;
   selectedCountry: string;
   handleCountryChange: (e: ChangeEvent<HTMLSelectElement>) => void;
   shippingCost: string;
+  shippingCostsByProvider: { [key: string]: string };
+  handlingTimesByProvider: { [key: string]: HandlingTime };
   totalItems: number;
-  isAdding: boolean;
 };
 
 export type ShoppingCartProps = {
   items: Item[];
 };
 
+export type HandlingTime = {
+  unit: string;
+  value: number;
+};
+
 export type ShippingDetails = {
-  handling_time: object;
+  handling_time: HandlingTime;
   profiles: Array<ShippingProfile>;
 };
 
@@ -138,6 +147,7 @@ export type ShippingProfile = {
   additional_items: ShippingCostDetail;
   countries: Array<string>;
   variant_ids: Array<number>;
+  handling_time: HandlingTime;
 };
 
 export type ShippingCostDetail = {

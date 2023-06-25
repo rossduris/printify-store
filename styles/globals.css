@@ -108,7 +108,7 @@ body {
 }
 
 .cartShow {
-  right: -500px;
+  right: -700px;
   transition: all 0.25s ease-in-out;
 }
 
@@ -140,4 +140,12 @@ select {
 .cartSummary > div {
   display: flex;
   justify-content: space-between;
+}
+
+.showShipping {
+  display: block;
+}
+
+.hideShipping {
+  display: none;
 }

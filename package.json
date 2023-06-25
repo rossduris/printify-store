@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@heroicons/react": "^2.0.17",
+    "@heroicons/react": "^2.0.18",
     "@stripe/stripe-js": "^1.54.0",
     "@types/cookie": "^0.5.1",
     "@types/node": "18.16.3",

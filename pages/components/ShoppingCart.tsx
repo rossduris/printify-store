@@ -1,6 +1,7 @@
 import { CartItem } from "@/types";
 import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
+import PrintProviderGroup from "./PrintProviderGroup";
 
 const ShoppingCart = () => {
   const {
@@ -12,12 +13,26 @@ const ShoppingCart = () => {
     handleCountryChange,
     totalItems,
     shippingCost,
+    shippingCostsByProvider,
   } = useCart();
   const [cartVisible, setCartVisible] = useState(false);
 
   const toggleCart = () => {
     setCartVisible(!cartVisible);
   };
+
+  // Grouping items by print_provider_id
+  const groupedItems = items.reduce(
+    (grouped: { [key: string]: CartItem[] }, item: CartItem) => {
+      const key = item.print_provider_id;
+      if (!grouped[key]) {
+        grouped[key] = [];
+      }
+      grouped[key].push(item);
+      return grouped;
+    },
+    {}
+  );
 
   return (
     <>
@@ -40,56 +55,13 @@ const ShoppingCart = () => {
         <div
           className={`${
             !cartVisible ? "cartShow" : "cartHide"
-          } bg-white right-0 w-[500px] flex items-center flex-col p-4  min-h-12  absolute top-0 overflow-scroll shadow-xl h-[100vh] display`}
+          } bg-white right-0 w-[700px] flex items-center flex-col p-4  min-h-12  absolute top-0 overflow-scroll shadow-xl h-[100vh] display`}
         >
           <h3 className="text-2xl font-bold  pb-6 ">Cart {totalItems} Items</h3>
 
-          <div>
-            {items.length ? (
-              items.map((item: CartItem) => (
-                <div
-                  className="border border-gray-300 p-2 rounded-lg flex items-center gap-6 my-6"
-                  key={item.product_id + item.variant_id}
-                >
-                  <img src={item.image} className=" w-24 h-24" />
-                  <div>
-                    <div>{item.name}</div>
-                  </div>
-                  <div>${item.price}</div>
-                  <select
-                    className="rounded-md px-1 h-6 bg-slate-200 border border-slate-300 text-slate-500"
-                    value={item.quantity}
-                    onChange={(e) => {
-                      const newQuantity = Number(e.target.value);
-                      console.log(newQuantity);
-                      if (newQuantity > 0) {
-                        updateItem(
-                          item.product_id,
-                          item.variant_id,
-                          newQuantity
-                        );
-                      } else {
-                        removeItem(item.product_id, item.variant_id);
-                      }
-                    }}
-                  >
-                    {[...Array(11).keys()].map((value) => (
-                      <option key={value} value={value}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
+          <div className="w-full p-2">
+            <PrintProviderGroup items={items} />
 
-                  <button
-                    onClick={() => removeItem(item.product_id, item.variant_id)}
-                  >
-                    X
-                  </button>
-                </div>
-              ))
-            ) : (
-              <div>No items</div>
-            )}
             <div className=" pt-6">
               <label htmlFor="countrySelect">Delivery Country: </label>
               <select
@@ -114,26 +86,9 @@ const ShoppingCart = () => {
               </div>
 
               <div className=" p-1 text-sm mt-2 text-gray-600 ">
-                <span>Subtotal before tax: </span>
+                <span>Subtotal: </span>
                 <span>
                   ${(Number(getTotalPrice()) + Number(shippingCost)).toFixed(2)}
-                </span>
-              </div>
-
-              <div className=" p-1 text-sm rounded-lg mt-2 text-gray-600">
-                <span>Estimated tax to be collected: </span>
-                <span>${(Number(getTotalPrice()) * 0.08).toFixed(2)}</span>
-              </div>
-
-              <div className=" p-1 text-lg pt-8 mt-6 text-gray-600 border-t broder-gray-200">
-                <span> Order total: </span>
-                <span>
-                  $
-                  {(
-                    Number(getTotalPrice()) +
-                    Number(shippingCost) +
-                    Number(getTotalPrice()) * 0.08
-                  ).toFixed(2)}
                 </span>
               </div>
             </div>
