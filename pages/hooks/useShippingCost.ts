@@ -69,7 +69,7 @@ export const useShippingCost = () => {
 
       const data = await response.json();
 
-      console.log("handling time: ", data.handling_time);
+      console.log("handling time: ", data);
 
       const restOfTheWorldProfile = data.profiles.find(
         (profile: ShippingProfile) =>

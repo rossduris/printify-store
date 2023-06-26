@@ -18,8 +18,7 @@ const ProviderItems = ({
   country,
   children,
 }: ProviderItemsProps) => {
-  const { updateItem, removeItem, shippingCostsByProvider, selectedCountry } =
-    useCart();
+  const { updateItem, removeItem, shippingCostsByProvider } = useCart();
 
   const [toggleShipping, setToggleShipping] = useState(false);
 
@@ -75,9 +74,11 @@ const ProviderItems = ({
                     </option>
                   ))}
               </select>
-
-              <div onClick={() => removeItem(item.product_id, item.variant_id)}>
-                <TrashIcon className=" cursor-pointer hover:text-gray-400 h-5 w-5 text-gray-500 transition-all duration-1" />
+              <div className="w-5 h-5">
+                <TrashIcon
+                  onClick={() => removeItem(item.product_id, item.variant_id)}
+                  className=" cursor-pointer hover:text-gray-400 h-5 w-5 text-gray-500 transition-all duration-1"
+                />
               </div>
             </div>
           );

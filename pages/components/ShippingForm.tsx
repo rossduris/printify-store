@@ -4,6 +4,7 @@ import { Address, CartItem, ShippingDetails, ShippingProfile } from "@/types";
 import { useCart } from "../context/CartContext";
 import { useEffect, useState } from "react";
 import CartReview from "./CartReview";
+import { loadStripe } from "@stripe/stripe-js";
 
 const validationSchema = Yup.object().shape({
   first_name: Yup.string().required("Required"),
@@ -19,7 +20,8 @@ const validationSchema = Yup.object().shape({
 });
 
 const ShippingForm = () => {
-  const { calculateShipping, selectedCountry, handleCountryChange } = useCart();
+  const { calculateShipping, selectedCountry, handleCountryChange, items } =
+    useCart();
 
   const formik = useFormik({
     initialValues: {
@@ -35,12 +37,61 @@ const ShippingForm = () => {
       zip: "",
     } as Address,
     validationSchema,
-    onSubmit: (values, { setSubmitting }) => {
-      setSubmitting(false);
+    onSubmit: async (values, { setSubmitting }) => {
+      setSubmitting(true);
+      // Perform operations with form values (like shipping calculations)
       console.log(values);
-      // Here you can call the function to calculate the shipping and handle the next checkout steps
+
+      // Call handleCheckout function to create Stripe session and redirect
+      await handleCheckout();
+
+      setSubmitting(false);
     },
   });
+
+  const handleCheckout = async () => {
+    const stripePromise = loadStripe(
+      String(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+    );
+    const stripe = await stripePromise;
+
+    if (!stripe) return;
+
+    // Fetch Checkout Session via /api/create-checkout-session
+    const response = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        items,
+        customer: {
+          email: formik.values.email,
+          address: {
+            line1: formik.values.address1,
+            line2: formik.values.address2 || undefined,
+            city: formik.values.city,
+            postal_code: formik.values.zip,
+            state: formik.values.region,
+            country: formik.values.country,
+          },
+        },
+      }),
+    });
+
+    const { id: sessionId } = await response.json();
+
+    console.log("sessionId:", sessionId); // Add this line
+
+    // When the customer clicks on the button, redirect them to Checkout.
+    const result = await stripe.redirectToCheckout({
+      sessionId,
+    });
+
+    if (result.error) {
+      console.log(result.error.message);
+    }
+  };
 
   return (
     <form onSubmit={formik.handleSubmit} className="">
@@ -200,7 +251,7 @@ const ShippingForm = () => {
             </label>
             <input
               {...formik.getFieldProps("phone")}
-              className="input input-bordered mb-10"
+              className="input input-bordered "
             />
             {formik.touched.phone && formik.errors.phone ? (
               <span className="label-text text-error">
@@ -210,8 +261,12 @@ const ShippingForm = () => {
           </div>
         </div>
         <CartReview>
-          <button type="submit" className="btn btn-primary absolute">
-            Proceed to Payment
+          <button
+            type="submit"
+            role="link"
+            className="mt-5 w-full px-4 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none"
+          >
+            Proceed to Checkout
           </button>
         </CartReview>
       </div>

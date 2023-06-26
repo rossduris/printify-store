@@ -1,38 +1,21 @@
-import { CartItem } from "@/types";
-import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import PrintProviderGroup from "./PrintProviderGroup";
 
 const ShoppingCart = () => {
   const {
     items,
-    updateItem,
-    removeItem,
     getTotalPrice,
     selectedCountry,
     handleCountryChange,
     totalItems,
     shippingCost,
-    shippingCostsByProvider,
   } = useCart();
   const [cartVisible, setCartVisible] = useState(false);
 
   const toggleCart = () => {
     setCartVisible(!cartVisible);
   };
-
-  // Grouping items by print_provider_id
-  const groupedItems = items.reduce(
-    (grouped: { [key: string]: CartItem[] }, item: CartItem) => {
-      const key = item.print_provider_id;
-      if (!grouped[key]) {
-        grouped[key] = [];
-      }
-      grouped[key].push(item);
-      return grouped;
-    },
-    {}
-  );
 
   return (
     <>
@@ -55,7 +38,7 @@ const ShoppingCart = () => {
         <div
           className={`${
             !cartVisible ? "cartShow" : "cartHide"
-          } bg-white right-0 w-[700px] flex items-center flex-col p-4  min-h-12  absolute top-0 overflow-scroll shadow-xl h-[100vh] display`}
+          } bg-white right-0 w-[550px] flex items-center flex-col p-4  min-h-12  absolute top-0 overflow-scroll shadow-xl h-[100vh] display`}
         >
           <h3 className="text-2xl font-bold  pb-6 ">Cart {totalItems} Items</h3>
 
@@ -72,6 +55,7 @@ const ShoppingCart = () => {
               >
                 <option value="US">United States</option>
                 <option value="CA">Canada</option>
+                <option value="AU">Austrailia</option>
                 <option value="REST_OF_THE_WORLD">Rest of the World</option>
               </select>
             </div>
