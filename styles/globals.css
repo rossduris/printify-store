@@ -93,15 +93,6 @@ body {
   color: rgb(107, 107, 107);
 }
 
-.drawer-toggle:checked ~ .drawer-side > .drawer-overlay,
-.drawer-toggle:checked ~ .drawer-side {
-  z-index: 50;
-}
-.drawer-toggle:not(:checked) ~ .drawer-side > .drawer-overlay,
-.drawer-toggle:not(:checked) ~ .drawer-side {
-  z-index: -50;
-}
-
 .cartHide {
   right: 0;
   transition: all 0.25s ease-in-out;

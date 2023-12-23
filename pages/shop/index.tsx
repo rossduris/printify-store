@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import ShoppingCart from "../components/ShoppingCart";
 import Product from "../components/Product";
 import { ShopProduct } from "@/types";
+import Modal from "../components/Modal";
 
 const Shop = () => {
   const [products, setProducts] = useState<Array<ShopProduct>>();
@@ -27,11 +28,17 @@ const Shop = () => {
     getProducts();
   }, []);
 
+  const [showModal, setShowModal] = useState(false);
+  const toggleModal = () => {
+    setShowModal(!showModal);
+  };
+
   return (
     <div className=" bg-slate-800">
       <ShoppingCart />
 
       <h1 className="text-4xl font-bold px-10 pt-10">Planet Cyborg</h1>
+      <button onClick={toggleModal}>Toggle</button>
 
       <div className="bg-[#f1f1f1] p-4 rounded-lg grid md:grid-cols-2 lg:grid-cols-3 sm:grid-cols-1 relative gap-10 m-10">
         {products
@@ -40,6 +47,13 @@ const Shop = () => {
             })
           : "Loading..."}
       </div>
+      {showModal && (
+        <div className="fixed top-0 left-0 w-full h-full bg-slate-300 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white shadow-xl rounded-2xl">
+            <Modal />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

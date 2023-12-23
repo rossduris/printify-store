@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useCart } from "../context/CartContext";
 import { ProductImagesProps, ProductProps, SelectVariantProps } from "@/types";
+import Modal from "./Modal";
 
 const ProductImages = ({ images }: ProductImagesProps) => {
   return (
@@ -30,7 +31,12 @@ const SelectVariant = React.memo(
     selectedVariant,
     setSelectedVariant,
   }: SelectVariantProps) => {
-    const { addItem } = useCart();
+    const { addItem, items } = useCart();
+
+    const [showModal, setShowModal] = useState(false);
+    const toggleModal = () => {
+      setShowModal(!showModal);
+    };
 
     return (
       <div className="flex items-center flex-col p-4 relative">
@@ -41,6 +47,7 @@ const SelectVariant = React.memo(
             product.variants[0]?.id
           }
           onChange={(e) => {
+            // setPreviousVariant(Number(e.target.value.split("-")[0]));
             setSelectedVariant(Number(e.target.value.split("-")[0]));
           }}
         >
@@ -55,19 +62,22 @@ const SelectVariant = React.memo(
             : "Loading variants..."}
         </select>
         <div className="flex justify-between pt-4 w-full">
-          <button
+          <label
             className=" btn btn-primary"
-            onClick={() => {
-              const selectedVariantObj = variants.find(
-                (v) => v.id === selectedVariant
-              );
-              if (!selectedVariantObj) return; // or handle this case as you wish
-
+            onClick={() =>
               addItem({
                 product_id: product.id,
-                name: product.title + ", " + selectedVariantObj?.title,
-                price: Number(selectedVariantObj?.price) / 100,
-                variant_id: Number(selectedVariantObj?.id),
+                name:
+                  product.title +
+                  ", " +
+                  variants.find((v) => v.id === selectedVariant)?.title,
+                price:
+                  Number(
+                    variants.find((v) => v.id === selectedVariant)?.price
+                  ) / 100,
+                variant_id: Number(
+                  variants.find((v) => v.id === selectedVariant)?.id
+                ),
                 blueprint_id: Number(product.blueprint_id),
                 print_provider_id: Number(product.print_provider_id),
                 image: String(
@@ -75,17 +85,16 @@ const SelectVariant = React.memo(
                     image.variant_ids.includes(Number(selectedVariant))
                   )[0].src
                 ),
-              });
-            }}
+              })
+            }
           >
             Add to cart
-          </button>
-
-          <label htmlFor="my-modal" className="btn">
+          </label>
+          <label onClick={toggleModal} className="btn">
             Quick Look
           </label>
-          <input type="checkbox" id="my-modal" className="modal-toggle" />
-          <label htmlFor="my-modal" className="modal cursor-pointer">
+
+          {/* <label htmlFor="my-modal" className="modal cursor-pointer">
             <label className="modal-box relative" htmlFor="">
               <h3 className="text-lg font-bold">{product.title}</h3>
               <ProductImages
@@ -98,7 +107,7 @@ const SelectVariant = React.memo(
                 </label>
               </div>
             </label>
-          </label>
+          </label> */}
           <label className="text-green-800 text-xl font-bold flex justify-center items-end">
             $
             {Number(variants.find((v) => v.id === selectedVariant)?.price) /
