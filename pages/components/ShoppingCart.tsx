@@ -39,9 +39,11 @@ const ShoppingCart = () => {
         <div
           className={`${
             !cartVisible ? "cartShow" : "cartHide"
-          } bg-white right-0 w-[650px] flex items-center flex-col p-4  min-h-12  absolute top-0 overflow-scroll shadow-xl h-[100vh] display`}
+          } bg-white right-0 w-[430px] md:w-[650px] flex items-center flex-col p-4  min-h-12  absolute top-0 overflow-scroll shadow-xl h-[100vh] display`}
         >
-          <h3 className="text-2xl font-bold  pb-6 ">Cart {totalItems} Items</h3>
+          <h3 className="text-2xl font-bold  pb-6 ">
+            Cart {totalItems} Item{totalItems > 1 ? "s" : ""}
+          </h3>
 
           <div className="w-full p-2">
             <PrintProviderGroup items={items} />

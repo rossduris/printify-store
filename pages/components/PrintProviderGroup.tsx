@@ -45,7 +45,7 @@ const ProviderItems = ({
         {itemsOfProvider.map((item: CartItem) => {
           return (
             <div
-              className=" p-2 rounded-lg flex items-center gap-6 my-6 justify-between"
+              className=" p-2 rounded-lg flex items-center flex-col md:flex-row gap-6 my-6 justify-between"
               key={item.product_id + item.variant_id}
             >
               <Image
