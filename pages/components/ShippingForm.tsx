@@ -266,7 +266,7 @@ const ShippingForm = () => {
             role="link"
             className="mt-5 w-full px-4 py-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none"
           >
-            Proceed to Checkout
+            Proceed to Payment
           </button>
         </CartReview>
       </div>
