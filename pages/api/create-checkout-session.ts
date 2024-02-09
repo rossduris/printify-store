@@ -31,8 +31,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         payment_method_types: ["card"],
         line_items: lineItems,
         mode: "payment",
-        success_url: `http://localhost:3000/?success=true`,
-        cancel_url: `http://localhost:3000/?canceled=true`,
+        success_url: `http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `http://localhost:3000/canceled`,
       });
 
       res.status(200).json({ id: session.id });

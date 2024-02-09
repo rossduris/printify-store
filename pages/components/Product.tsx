@@ -63,7 +63,7 @@ const SelectVariant = React.memo(
         </select>
         <div className="flex justify-between pt-4 w-full">
           <label
-            className=" btn btn-primary"
+            className=" btn btn-primary w-[70%] ml-4"
             onClick={() =>
               addItem({
                 product_id: product.id,
@@ -90,9 +90,9 @@ const SelectVariant = React.memo(
           >
             Add to cart
           </label>
-          <label onClick={toggleModal} className="btn">
+          {/* <label onClick={toggleModal} className="btn">
             Quick Look
-          </label>
+          </label> */}
 
           {/* <label htmlFor="my-modal" className="modal cursor-pointer">
             <label className="modal-box relative" htmlFor="">

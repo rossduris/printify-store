@@ -140,7 +140,7 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
     }
   };
 
-  //Old addItem code that didn't work...
+  //Test this addItem code ..
   // const addItem = (item: Item) => {
   //   setCartItems((prevItems) => {
   //     // Check if item already exists in the cart

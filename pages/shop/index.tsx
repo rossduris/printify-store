@@ -38,7 +38,7 @@ const Shop = () => {
       <ShoppingCart />
 
       <h1 className="text-4xl font-bold px-10 pt-10">Planet Cyborg</h1>
-      <button onClick={toggleModal}>Toggle</button>
+      {/* <button onClick={toggleModal}>Toggle</button> */}
 
       <div className="bg-[#f1f1f1] p-4 rounded-lg grid md:grid-cols-2 lg:grid-cols-3 sm:grid-cols-1 relative gap-10 m-10">
         {products

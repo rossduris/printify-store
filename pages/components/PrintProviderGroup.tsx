@@ -102,7 +102,7 @@ const ProviderItems = ({
           Estimated Shipping & Handling Time:
           {handlingTime.value
             ? `${handlingTime.value} ${handlingTime.unit}s`
-            : "Unknown"}
+            : "10 Days"}
         </div>
       </div>
     </div>

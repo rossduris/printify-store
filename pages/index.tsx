@@ -1,64 +1,64 @@
-import Image from "next/image";
-import { Inter } from "next/font/google";
-import { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import ShoppingCart from "./components/ShoppingCart";
+import Product from "./components/Product";
+import { ShopProduct } from "@/types";
+import Modal from "./components/Modal";
+import Link from "next/link";
 
-export default function Home() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [image, setImage] = useState({
-    name: "",
-    url: "",
-  });
+const Shop = () => {
+  const [products, setProducts] = useState<Array<ShopProduct>>();
 
-  const uploadFromUrl = async () => {
-    setIsLoading(true);
-    const response = await fetch("/api/printify/upload-image", {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json;charset=utf-8",
-      },
-      referrerPolicy: "no-referrer",
-      body: JSON.stringify({
-        name: image.name,
-        url: image.url,
-      }),
-    });
-    const data = await response.json();
-    console.log(data);
-    setIsLoading(true);
+  const getProducts = async () => {
+    try {
+      const response = await fetch("/api/printify/get-shop-products", {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json;charset=utf-8",
+        },
+        referrerPolicy: "no-referrer",
+      });
+      const data = await response.json();
+      setProducts(data.data);
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    }
+  };
+
+  useEffect(() => {
+    getProducts();
+  }, []);
+
+  const [showModal, setShowModal] = useState(false);
+  const toggleModal = () => {
+    setShowModal(!showModal);
   };
 
   return (
-    <div>
-      <h1>Printify Store</h1>
-      <div>
-        <h2>Create Product</h2>
-        <div>
-          <h3>Preview</h3>
-          <img src={image.url} className=" w-40 h-40" />
-        </div>
+    <div className=" bg-slate-800">
+      <ShoppingCart />
 
-        <input
-          className=" text-slate-400"
-          type="text"
-          id="fileName"
-          name="fileName"
-          placeholder="File name"
-          onChange={(e) => setImage({ ...image, name: e.target.value })}
-        />
-        <input
-          className=" text-slate-400"
-          type="text"
-          id="fileUrl"
-          name="fileUrl"
-          placeholder="File url"
-          onChange={(e) => setImage({ ...image, url: e.target.value })}
-        />
+      <h1 className="text-4xl font-bold px-10 pt-10">
+        <Link href="/">Planet Cyborg</Link>
+      </h1>
+      {/* <button onClick={toggleModal}>Toggle</button> */}
 
-        <button onClick={() => uploadFromUrl()}>
-          {isLoading ? "Loading..." : "Upload Image"}
-        </button>
+      <div className="bg-[#f1f1f1] p-4 rounded-lg grid md:grid-cols-2 lg:grid-cols-3 sm:grid-cols-1 relative gap-10 m-10">
+        {products
+          ? products.map((product) => {
+              return <Product key={product.id} product={product} />;
+            })
+          : "Loading..."}
       </div>
+      {showModal && (
+        <div className="fixed top-0 left-0 w-full h-full bg-slate-300 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white shadow-xl rounded-2xl">
+            <Modal />
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default Shop;
