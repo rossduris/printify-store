@@ -9,8 +9,6 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
     // Parse the cart items from the request body
     const cartItems: CartItem[] = req.body.items;
 
-    const { customer } = req.body;
-
     // Convert the cart items to the format expected by Stripe
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
       cartItems.map((item) => ({
