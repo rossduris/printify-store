@@ -2,6 +2,7 @@ import { CartItem } from "@/types";
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { TrashIcon } from "@heroicons/react/24/solid";
+import Image from "next/image";
 
 type PrintProviderGroupProps = {
   items: CartItem[];
@@ -47,7 +48,12 @@ const ProviderItems = ({
               className=" p-2 rounded-lg flex items-center gap-6 my-6 justify-between"
               key={item.product_id + item.variant_id}
             >
-              <img src={item.image} className=" w-24 h-24" />
+              <Image
+                alt={item.name}
+                src={item.image}
+                width={200}
+                height={200}
+              />
               <div>
                 <div>{item.name}</div>
               </div>

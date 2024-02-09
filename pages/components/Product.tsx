@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useCart } from "../context/CartContext";
 import { ProductImagesProps, ProductProps, SelectVariantProps } from "@/types";
 import Modal from "./Modal";
+import Image from "next/image";
 
 const ProductImages = ({ images }: ProductImagesProps) => {
   return (
@@ -11,18 +12,28 @@ const ProductImages = ({ images }: ProductImagesProps) => {
             .filter((img, i) => i === 0)
             .map((image, i) => (
               <div key={image.src} className=" relative min-h-[300px]">
-                <img
+                <Image
                   className=" absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[30%]"
+                  width="100"
+                  height="100"
                   src="/assets/loading.gif"
                   alt="loading..."
                 />
-                <img src={image.src} className="w-full h-full z-10 relative" />
+                <Image
+                  height={200}
+                  width={200}
+                  alt="product-image"
+                  src={image.src}
+                  className="w-full h-full z-10 relative"
+                />
               </div>
             ))
         : "Loading variant images"}
     </div>
   );
 };
+
+ProductImages.displayName = "ProductImages";
 
 const SelectVariant = React.memo(
   ({
@@ -90,7 +101,12 @@ const SelectVariant = React.memo(
           >
             Add to cart
           </label>
-          {/* <label onClick={toggleModal} className="btn">
+
+          {/* 
+          
+          Modal TODO:
+
+          <label onClick={toggleModal} className="btn">
             Quick Look
           </label> */}
 
@@ -119,6 +135,8 @@ const SelectVariant = React.memo(
   }
 );
 
+SelectVariant.displayName = "SelectVariant";
+
 const Product = React.memo(({ product }: ProductProps) => {
   const [selectedVariant, setSelectedVariant] = useState<number | undefined>(
     () => {
@@ -126,6 +144,8 @@ const Product = React.memo(({ product }: ProductProps) => {
       return defaultVariant ? defaultVariant.id : product.variants[0]?.id;
     }
   );
+
+  Product.displayName = "Product";
 
   const variantImages = useMemo(() => {
     return selectedVariant

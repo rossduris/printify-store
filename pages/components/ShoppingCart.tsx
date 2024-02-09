@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import PrintProviderGroup from "./PrintProviderGroup";
+import Link from "next/link";
 
 const ShoppingCart = () => {
   const {
@@ -77,11 +78,14 @@ const ShoppingCart = () => {
               </div>
             </div>
             {items.length > 0 ? (
-              <a className=" $ btn btn-primary w-full mt-4" href="/checkout">
-                Proceed to Checkout
-              </a>
+              <Link href="/checkout">
+                {" "}
+                <button className=" $ btn btn-primary w-full mt-4">
+                  Proceed to Checkout
+                </button>
+              </Link>
             ) : (
-              ""
+              "error"
             )}
           </div>
         </div>
