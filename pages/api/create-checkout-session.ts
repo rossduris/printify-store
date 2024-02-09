@@ -28,8 +28,8 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `http://localhost:3000/canceled`,
+      success_url: `https://printify-store.vercel.app/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://printify-store.vercel.app/canceled`,
     });
 
     res.status(200).json({ id: session.id });
