@@ -34,6 +34,7 @@ const initValue: CartContextType = {
   shippingCostsByProvider: {},
   handlingTimesByProvider: {},
   totalItems: 0,
+  setCartItems: (items: CartItem[]) => {},
 };
 
 const CartContext = createContext<CartContextType>(initValue);
@@ -51,37 +52,6 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
   }>({});
   const { getShippingInfo, calculateShipping } = useShippingCost();
   const [shippingCost, setShippingCost] = useState<string>("");
-
-  const calculateAndSetShippingCost = async () => {
-    const shippingInfo = await calculateShipping(selectedCountry, cartItems);
-    setShippingCost(shippingInfo.totalShippingCost);
-    setHandlingTimesByProvider(shippingInfo.handlingTimesByProvider);
-  };
-
-  const calculateAndSetShippingCostsByProvider = async () => {
-    const costs: { [key: string]: string } = {};
-    for (const item of cartItems) {
-      // Get the provider ID for each item (assuming it's a string)
-      const providerId = item.print_provider_id.toString();
-
-      // Calculate the shipping cost for the item
-      const costInfo = await calculateShipping(selectedCountry, [item]);
-
-      // If the provider ID is already in the costs object, add the new cost to the existing cost
-      if (providerId in costs) {
-        costs[providerId] = (
-          parseFloat(costs[providerId]) + parseFloat(costInfo.totalShippingCost)
-        ).toFixed(2);
-      } else {
-        // Otherwise, set the cost for the provider ID
-        costs[providerId] = costInfo.totalShippingCost;
-      }
-      setHandlingTimesByProvider(costInfo.handlingTimesByProvider);
-    }
-
-    // Set the new shipping costs by provider
-    setShippingCostsByProvider(costs);
-  };
 
   const totalItems = useMemo(() => {
     return cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -116,6 +86,12 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
     localStorage.setItem("shippingCost", shippingCost);
 
+    const calculateAndSetShippingCost = async () => {
+      const shippingInfo = await calculateShipping(selectedCountry, cartItems);
+      setShippingCost(shippingInfo.totalShippingCost);
+      setHandlingTimesByProvider(shippingInfo.handlingTimesByProvider);
+    };
+
     if (shippingCost === "") {
       // Only fetch initial shipping cost if it hasn't been calculated yet
       calculateAndSetShippingCost();
@@ -125,8 +101,34 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
       calculateAndSetShippingCost();
     }
 
+    const calculateAndSetShippingCostsByProvider = async () => {
+      const costs: { [key: string]: string } = {};
+      for (const item of cartItems) {
+        // Get the provider ID for each item (assuming it's a string)
+        const providerId = item.print_provider_id.toString();
+
+        // Calculate the shipping cost for the item
+        const costInfo = await calculateShipping(selectedCountry, [item]);
+
+        // If the provider ID is already in the costs object, add the new cost to the existing cost
+        if (providerId in costs) {
+          costs[providerId] = (
+            parseFloat(costs[providerId]) +
+            parseFloat(costInfo.totalShippingCost)
+          ).toFixed(2);
+        } else {
+          // Otherwise, set the cost for the provider ID
+          costs[providerId] = costInfo.totalShippingCost;
+        }
+        setHandlingTimesByProvider(costInfo.handlingTimesByProvider);
+      }
+
+      // Set the new shipping costs by provider
+      setShippingCostsByProvider(costs);
+    };
+
     calculateAndSetShippingCostsByProvider();
-  }, [selectedCountry, cartItems, isMounted, shippingCost]);
+  }, [selectedCountry, cartItems, isMounted, shippingCost, calculateShipping]);
 
   const handleCountryChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const newCountry = e.target.value;
@@ -263,6 +265,7 @@ export const CartProvider = ({ children, initialItems }: CartProviderProps) => {
         shippingCost,
         shippingCostsByProvider,
         handlingTimesByProvider,
+        setCartItems,
       }}
     >
       {children}

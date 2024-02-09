@@ -1,57 +1,63 @@
 import { CartItem, HandlingTime, ShippingProfile } from "@/types";
+import { useCallback } from "react";
 
 export const useShippingCost = () => {
-  const calculateShipping = async (country: string, cartItems: CartItem[]) => {
-    const shippingCostsByProvider: { [key: string]: number } = {};
-    const handlingTimesByProvider: { [key: string]: HandlingTime } = {};
-    const requests = [];
+  const calculateShipping = useCallback(
+    async (country: string, cartItems: CartItem[]) => {
+      const shippingCostsByProvider: { [key: string]: number } = {};
+      const handlingTimesByProvider: { [key: string]: HandlingTime } = {};
+      const requests = [];
 
-    for (let item of cartItems) {
-      const shippingCostDataString = localStorage.getItem(
-        `${item.print_provider_id}_${item.blueprint_id}_${country}`
+      for (let item of cartItems) {
+        const shippingCostDataString = localStorage.getItem(
+          `${item.print_provider_id}_${item.blueprint_id}_${country}`
+        );
+
+        let shippingCostData;
+
+        if (shippingCostDataString) {
+          console.log("using prev shipping cost");
+          shippingCostData = JSON.parse(shippingCostDataString);
+          requests.push({ item, shippingCostData });
+        } else {
+          console.log("getting new shipping cost");
+          const request = getShippingInfo(item, country).then(
+            (shippingCostData) => ({ item, shippingCostData })
+          );
+          requests.push(request);
+        }
+      }
+
+      const results = await Promise.all(requests);
+
+      results.forEach(({ item, shippingCostData }) => {
+        const existingCost =
+          shippingCostsByProvider[item.print_provider_id] || 0;
+
+        const newCost =
+          existingCost === 0
+            ? shippingCostData.firstItemCost +
+              shippingCostData.additionalItemCost * (item.quantity - 1)
+            : existingCost +
+              shippingCostData.additionalItemCost * item.quantity;
+
+        shippingCostsByProvider[item.print_provider_id] = newCost;
+        handlingTimesByProvider[item.print_provider_id] =
+          shippingCostData.handlingTime;
+      });
+
+      const totalShippingCost = Object.values(shippingCostsByProvider).reduce(
+        (a, b) => a + b,
+        0
       );
 
-      let shippingCostData;
-
-      if (shippingCostDataString) {
-        console.log("using prev shipping cost");
-        shippingCostData = JSON.parse(shippingCostDataString);
-        requests.push({ item, shippingCostData });
-      } else {
-        console.log("getting new shipping cost");
-        const request = getShippingInfo(item, country).then(
-          (shippingCostData) => ({ item, shippingCostData })
-        );
-        requests.push(request);
-      }
-    }
-
-    const results = await Promise.all(requests);
-
-    results.forEach(({ item, shippingCostData }) => {
-      const existingCost = shippingCostsByProvider[item.print_provider_id] || 0;
-
-      const newCost =
-        existingCost === 0
-          ? shippingCostData.firstItemCost +
-            shippingCostData.additionalItemCost * (item.quantity - 1)
-          : existingCost + shippingCostData.additionalItemCost * item.quantity;
-
-      shippingCostsByProvider[item.print_provider_id] = newCost;
-      handlingTimesByProvider[item.print_provider_id] =
-        shippingCostData.handlingTime;
-    });
-
-    const totalShippingCost = Object.values(shippingCostsByProvider).reduce(
-      (a, b) => a + b,
-      0
-    );
-
-    return {
-      totalShippingCost: totalShippingCost.toFixed(2),
-      handlingTimesByProvider,
-    };
-  };
+      return {
+        totalShippingCost: totalShippingCost.toFixed(2),
+        handlingTimesByProvider,
+      };
+    },
+    []
+  );
 
   const getShippingInfo = async (item: CartItem, country: string) => {
     try {

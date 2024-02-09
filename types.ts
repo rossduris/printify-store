@@ -126,6 +126,7 @@ export type CartContextType = {
   shippingCostsByProvider: { [key: string]: string };
   handlingTimesByProvider: { [key: string]: HandlingTime };
   totalItems: number;
+  setCartItems: (items: CartItem[]) => void;
 };
 
 export type ShoppingCartProps = {
