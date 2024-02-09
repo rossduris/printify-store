@@ -128,7 +128,7 @@ const SelectVariant = React.memo(
             {variants && variants !== undefined
               ? Number(variants.find((v) => v.id === selectedVariant)?.price) /
                 100
-              : "error"}
+              : ""}
           </label>
         </div>
       </div>

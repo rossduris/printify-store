@@ -85,7 +85,7 @@ const ShoppingCart = () => {
                 </button>
               </Link>
             ) : (
-              "error"
+              "cart is empty"
             )}
           </div>
         </div>
