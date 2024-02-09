@@ -1,6 +1,6 @@
 import { CartItem } from "@/types";
 import React, { useState } from "react";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../../context/CartContext";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 
@@ -116,12 +116,11 @@ const ProviderItems = ({
 };
 
 const PrintProviderGroup = ({ items }: PrintProviderGroupProps) => {
-  const groupedItems = items.reduce(
+  const safeItems = Array.isArray(items) ? items : [];
+  const groupedItems = safeItems.reduce(
     (grouped: { [key: string]: CartItem[] }, item: CartItem) => {
-      const key = item.print_provider_id;
-      if (!grouped[key]) {
-        grouped[key] = [];
-      }
+      const key = item.print_provider_id.toString(); // Ensure key is a string
+      grouped[key] = grouped[key] || [];
       grouped[key].push(item);
       return grouped;
     },

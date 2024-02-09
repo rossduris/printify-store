@@ -1,6 +1,6 @@
 import { CartItem } from "@/types";
 import React, { useEffect, useState } from "react";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../../context/CartContext";
 import PrintProviderGroup from "./PrintProviderGroup";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { loadStripe } from "@stripe/stripe-js";

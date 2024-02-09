@@ -55,7 +55,7 @@ export type ProductImage = {
 
 export type SelectVariantProps = {
   variants: Array<ProductVariant>;
-  setSelectedVariant: (id: number | undefined) => void;
+  setSelectedVariant: (id: number) => void;
   product: ShopProduct;
   selectedVariant: number | undefined;
 };

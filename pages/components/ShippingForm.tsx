@@ -1,7 +1,7 @@
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Address, CartItem, ShippingDetails, ShippingProfile } from "@/types";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../../context/CartContext";
 import { useEffect, useState } from "react";
 import CartReview from "./CartReview";
 import { loadStripe } from "@stripe/stripe-js";

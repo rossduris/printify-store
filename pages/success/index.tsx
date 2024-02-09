@@ -1,6 +1,6 @@
 import Link from "next/link";
 import React, { useEffect } from "react";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../../context/CartContext";
 
 const Success = () => {
   const { setCartItems } = useCart();

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../../context/CartContext";
 import { ProductImagesProps, ProductProps, SelectVariantProps } from "@/types";
 import Modal from "./Modal";
 import Image from "next/image";
@@ -42,12 +42,15 @@ const SelectVariant = React.memo(
     selectedVariant,
     setSelectedVariant,
   }: SelectVariantProps) => {
-    const { addItem, items } = useCart();
+    const { addItem } = useCart();
 
-    const [showModal, setShowModal] = useState(false);
-    const toggleModal = () => {
-      setShowModal(!showModal);
-    };
+    if (
+      !variants ||
+      variants === undefined ||
+      product === undefined ||
+      !product.variants
+    )
+      return <div>Loading variants...</div>;
 
     return (
       <div className="flex items-center flex-col p-4 relative">
@@ -62,7 +65,7 @@ const SelectVariant = React.memo(
             setSelectedVariant(Number(e.target.value.split("-")[0]));
           }}
         >
-          {variants
+          {variants && variants !== undefined
             ? variants
                 .filter((variant) => variant.is_enabled)
                 .map((variant) => (
@@ -74,30 +77,26 @@ const SelectVariant = React.memo(
         </select>
         <div className="flex justify-between pt-4 w-full">
           <label
-            className=" btn btn-primary w-[70%] ml-4"
-            onClick={() =>
+            className="btn btn-primary w-[70%] ml-4"
+            onClick={() => {
+              const variant =
+                variants && variants.find((v) => v.id === selectedVariant);
               addItem({
                 product_id: product.id,
-                name:
-                  product.title +
-                  ", " +
-                  variants.find((v) => v.id === selectedVariant)?.title,
-                price:
-                  Number(
-                    variants.find((v) => v.id === selectedVariant)?.price
-                  ) / 100,
-                variant_id: Number(
-                  variants.find((v) => v.id === selectedVariant)?.id
-                ),
+                name: `${product.title}, ${
+                  variant ? variant.title : "no variants"
+                }`,
+                price: Number(variant ? variant.price : 0) / 100,
+                variant_id: Number(variant ? variant.id : undefined),
                 blueprint_id: Number(product.blueprint_id),
                 print_provider_id: Number(product.print_provider_id),
                 image: String(
-                  product.images.filter((image) =>
+                  product.images.find((image) =>
                     image.variant_ids.includes(Number(selectedVariant))
-                  )[0].src
+                  )?.src || ""
                 ),
-              })
-            }
+              });
+            }}
           >
             Add to cart
           </label>
@@ -126,8 +125,10 @@ const SelectVariant = React.memo(
           </label> */}
           <label className="text-green-800 text-xl font-bold flex justify-center items-end">
             $
-            {Number(variants.find((v) => v.id === selectedVariant)?.price) /
-              100}
+            {variants && variants !== undefined
+              ? Number(variants.find((v) => v.id === selectedVariant)?.price) /
+                100
+              : "error"}
           </label>
         </div>
       </div>
@@ -138,22 +139,24 @@ const SelectVariant = React.memo(
 SelectVariant.displayName = "SelectVariant";
 
 const Product = React.memo(({ product }: ProductProps) => {
-  const [selectedVariant, setSelectedVariant] = useState<number | undefined>(
-    () => {
-      const defaultVariant = product.variants.find((v) => v.is_default);
-      return defaultVariant ? defaultVariant.id : product.variants[0]?.id;
-    }
-  );
+  const [selectedVariant, setSelectedVariant] = useState<any>(() => {
+    if (!product || !product.variants) return null;
+    const defaultVariant = product.variants.find((v) => v.is_default);
+    return defaultVariant ? defaultVariant.id : product.variants[0]?.id;
+  });
 
+  // useMemo is called at the top level, without being wrapped in any condition.
+  const variantImages = selectedVariant
+    ? product.images.filter((image) =>
+        image.variant_ids.includes(selectedVariant)
+      )
+    : [];
   Product.displayName = "Product";
 
-  const variantImages = useMemo(() => {
-    return selectedVariant
-      ? product.images.filter((image) =>
-          image.variant_ids.includes(selectedVariant)
-        )
-      : [];
-  }, [product.images, selectedVariant]);
+  if (selectedVariant == null) return <div>Loading...</div>;
+
+  if (!product || !product.variants || product == undefined)
+    return <div>Loading...</div>;
 
   return (
     <div className=" bg-white shadow-xl rounded-2xl z-30">
@@ -161,7 +164,7 @@ const Product = React.memo(({ product }: ProductProps) => {
 
       <ProductImages selectedVariant={selectedVariant} images={variantImages} />
       <SelectVariant
-        variants={product.variants}
+        variants={product.variants ? product.variants : []}
         selectedVariant={selectedVariant}
         setSelectedVariant={setSelectedVariant}
         product={product}
