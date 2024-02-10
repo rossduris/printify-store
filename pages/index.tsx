@@ -33,7 +33,7 @@ export default Shop;
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   // Replace "YOUR_API_ENDPOINT" with your actual API endpoint
   const response = await fetch(
-    "http://localhost:3000/api/printify/get-shop-products",
+    "http://printify-store.vercel.app/api/printify/get-shop-products",
     {
       method: "POST", // Ensure this is the correct method and endpoint for your use case
       headers: {
