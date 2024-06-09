@@ -4,6 +4,7 @@ import Product from "./components/Product";
 import Link from "next/link";
 import { ShopProduct } from "@/types"; // Ensure this path is correct
 import { GetServerSidePropsContext } from "next";
+import HomeBanner from "./components/HomeBanner";
 
 // Corrected the type annotation for the products prop
 const Shop = ({ products }: { products: ShopProduct[] }) => {
@@ -14,6 +15,8 @@ const Shop = ({ products }: { products: ShopProduct[] }) => {
       <Link href="/">
         <h1 className="text-4xl font-bold p-10">Planet Cyborg</h1>
       </Link>
+
+      <HomeBanner />
 
       <div className="bg-[#f1f1f1] p-4 rounded-lg grid md:grid-cols-2 lg:grid-cols-3 sm:grid-cols-1 relative gap-10 m-10">
         {
@@ -33,7 +36,7 @@ export default Shop;
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   // Replace "YOUR_API_ENDPOINT" with your actual API endpoint
   const response = await fetch(
-    "http://printify-store.vercel.app/api/printify/get-shop-products",
+    "http://localhost:3000/api/printify/get-shop-products",
     {
       method: "POST", // Ensure this is the correct method and endpoint for your use case
       headers: {
